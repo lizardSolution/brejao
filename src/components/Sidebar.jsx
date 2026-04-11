@@ -77,6 +77,10 @@ export default function Sidebar() {
           <button className="sidebar-logout" onClick={logout}>
             <span>Sair</span>
           </button>
+          
+          <div className="sidebar-watermark" style={{ marginTop: '16px', fontSize: '0.75rem', color: 'var(--color-text-muted)', textAlign: 'center', opacity: 0.6, borderTop: '1px solid var(--color-border)', paddingTop: '12px' }}>
+            &copy; {new Date().getFullYear()} Lizard Solutions
+          </div>
         </div>
       </aside>
     </>

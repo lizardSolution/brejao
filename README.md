@@ -67,4 +67,4 @@ No primeiro uso, o sistema injetará automaticamente um banco de dados relaciona
 - **Senha:** `admin123`
 
 ---
-*Projeto desenvolvido por [Seu Nome/assuncax] e disponível como comprovação de aptidão técnica.*
+*Desenvolvido por **Lizard Solutions**.*
