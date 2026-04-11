@@ -1,0 +1,17 @@
+node_modules
+dist
+dist-ssr
+.env
+.git
+.gitignore
+.vscode
+.idea
+*.log
+*.local
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.DS_Store
+.gemini
