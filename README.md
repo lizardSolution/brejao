@@ -1,6 +1,6 @@
-# GMScheduler - Sistema de Gestão para Barbearias ✂️🚀
+# Lizard Solutions - Sistema de Gestão para Barbearias ✂️🚀
 
-Bem-vindo ao **GMScheduler**, uma plataforma completa e moderna desenvolvida para simplificar e automatizar toda a rotina operacional de uma barbearia. Desde a organização da agenda dos profissionais até o rigoroso controle de produtos e fluxo de caixa, este sistema oferece uma solução ponta-a-ponta com uma interface amigável (UX/UI) e engenharia de software robusta.
+Bem-vindo ao **Lizard Solutions**, uma plataforma completa e moderna desenvolvida para simplificar e automatizar toda a rotina operacional de uma barbearia. Desde a organização da agenda dos profissionais até o rigoroso controle de produtos e fluxo de caixa, este sistema oferece uma solução ponta-a-ponta com uma interface amigável (UX/UI) e engenharia de software robusta.
 
 ## 🌟 Funcionalidades e Módulos do Sistema
 
@@ -37,7 +37,7 @@ Este projeto utiliza uma stack JavaScript isolada e empacotada em arquitetura de
 
 ## ⚙️ Como executar este projeto localmente
 
-Devido à excelente padronização com **Docker**, rodar o GMScheduler no seu ambiente é rápido e dispensa a configuração minuciosa do Node.js ou do Postgres na sua própria máquina.
+Devido à excelente padronização com **Docker**, rodar o Lizard Solutions no seu ambiente é rápido e dispensa a configuração minuciosa do Node.js ou do Postgres na sua própria máquina.
 
 ### Requisitos Mínimos (Setup Recomendado)
 - **Docker Engine** e **Docker Compose** instalados (Ou Docker Desktop no Windows/Mac).

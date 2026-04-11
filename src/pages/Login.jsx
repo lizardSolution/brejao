@@ -39,7 +39,7 @@ export default function Login() {
         <div className="login-card-inner">
           <div className="login-logo">
             <div className="login-logo-icon">GM</div>
-            <h1 className="login-title">GMScheduler</h1>
+            <h1 className="login-title">Lizard Solutions</h1>
             <p className="login-subtitle">Sistema de Gestão para Barbearia</p>
           </div>
 

@@ -42,9 +42,9 @@ export default function Sidebar() {
 
       <aside className={`sidebar ${mobileOpen ? 'open' : ''}`}>
         <div className="sidebar-header">
-          <div className="sidebar-logo">GM</div>
+          <div className="sidebar-logo">LS</div>
           <div className="sidebar-brand">
-            <span className="sidebar-brand-name">GMScheduler</span>
+            <span className="sidebar-brand-name">Lizard Solutions</span>
             <span className="sidebar-brand-sub">Sistema de Gestão</span>
           </div>
         </div>
