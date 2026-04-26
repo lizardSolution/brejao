@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: lizardsolutions
+    runtime: node
+    buildCommand: npm install && npm run build
+    startCommand: node server/setup.js && node server/index.js
+    envVars:
+      - key: NODE_VERSION
+        value: 22
+      - key: DATABASE_URL
+        sync: false

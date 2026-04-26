@@ -14,44 +14,55 @@ const __dirname = path.dirname(__filename);
 dotenv.config();
 
 async function setup() {
-  const dbName = process.env.DB_NAME || 'gmscheduler';
+  const isCloud = !!process.env.DATABASE_URL;
+  const dbName = process.env.DB_NAME || 'LizardSolutions';
   
-  // 1. Conectar ao banco genérico para criar o novo banco se não existir
-  const clientSetup = new Client({
-    host: process.env.DB_HOST || 'localhost',
-    port: process.env.DB_PORT || 5432,
-    user: process.env.DB_USER || 'postgres',
-    password: process.env.DB_PASSWORD || 'admin',
-    database: 'postgres',
-  });
+  let clientDb;
 
-  try {
-    await clientSetup.connect();
-    console.log('Conectado ao PostgreSQL (banco padrão).');
-    
-    const res = await clientSetup.query(`SELECT datname FROM pg_catalog.pg_database WHERE datname = '${dbName}'`);
-    if (res.rowCount === 0) {
-      console.log(`Criando banco de dados "${dbName}"...`);
-      await clientSetup.query(`CREATE DATABASE "${dbName}"`);
-      console.log(`Banco de dados "${dbName}" criado com sucesso!`);
-    } else {
-      console.log(`Banco de dados "${dbName}" já existe.`);
+  if (isCloud) {
+    // Cloud (Neon/Render): banco já existe, conectar direto via DATABASE_URL
+    console.log('Modo cloud detectado (DATABASE_URL). Conectando...');
+    clientDb = new Client({
+      connectionString: process.env.DATABASE_URL,
+      ssl: { rejectUnauthorized: false }
+    });
+  } else {
+    // Local (Docker): criar banco se necessário
+    const clientSetup = new Client({
+      host: process.env.DB_HOST || 'localhost',
+      port: process.env.DB_PORT || 5432,
+      user: process.env.DB_USER || 'postgres',
+      password: process.env.DB_PASSWORD || 'admin',
+      database: 'postgres',
+    });
+
+    try {
+      await clientSetup.connect();
+      console.log('Conectado ao PostgreSQL (banco padrão).');
+      
+      const res = await clientSetup.query(`SELECT datname FROM pg_catalog.pg_database WHERE datname = '${dbName}'`);
+      if (res.rowCount === 0) {
+        console.log(`Criando banco de dados "${dbName}"...`);
+        await clientSetup.query(`CREATE DATABASE "${dbName}"`);
+        console.log(`Banco de dados "${dbName}" criado com sucesso!`);
+      } else {
+        console.log(`Banco de dados "${dbName}" já existe.`);
+      }
+    } catch (err) {
+      console.error('Erro ao conectar ou criar banco:', err);
+      process.exit(1);
+    } finally {
+      await clientSetup.end();
     }
-  } catch (err) {
-    console.error('Erro ao conectar ou criar banco:', err);
-    process.exit(1);
-  } finally {
-    await clientSetup.end();
-  }
 
-  // 2. Conectar ao novo banco para criar as tabelas
-  const clientDb = new Client({
-    host: process.env.DB_HOST || 'localhost',
-    port: process.env.DB_PORT || 5432,
-    user: process.env.DB_USER || 'postgres',
-    password: process.env.DB_PASSWORD || 'admin',
-    database: dbName,
-  });
+    clientDb = new Client({
+      host: process.env.DB_HOST || 'localhost',
+      port: process.env.DB_PORT || 5432,
+      user: process.env.DB_USER || 'postgres',
+      password: process.env.DB_PASSWORD || 'admin',
+      database: dbName,
+    });
+  }
 
   try {
     await clientDb.connect();
