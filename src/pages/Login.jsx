@@ -37,8 +37,17 @@ export default function Login() {
 
       <div className="login-card">
         <div className="login-card-inner">
-          <div className="login-logo">
-            <div className="login-logo-icon">GM</div>
+          <div className="login-logo" style={{ marginBottom: '16px' }}>
+            <img 
+              src="/img/logo.png" 
+              alt="Logo Lizard Solutions" 
+              style={{ display: 'block', margin: '0 auto 8px auto', width: '90px', height: 'auto', objectFit: 'contain', borderRadius: '12px' }}
+              onError={(e) => {
+                e.target.style.display = 'none';
+                e.target.nextSibling.style.display = 'flex';
+              }}
+            />
+            <div className="login-logo-icon" style={{ display: 'none' }}>LS</div>
             <h1 className="login-title">Lizard Solutions</h1>
             <p className="login-subtitle">Sistema de Gestão para Barbearia</p>
           </div>

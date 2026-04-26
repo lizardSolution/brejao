@@ -16,6 +16,11 @@ export default function Products() {
   const [confirmDelete, setConfirmDelete] = useState({ isOpen: false, id: null });
   const [alertMessage, setAlertMessage] = useState(null);
 
+  // Estado do carrinho de venda
+  const [carrinhoVenda, setCarrinhoVenda] = useState([]);
+  const [clienteVenda, setClienteVenda] = useState('');
+  const [itemAvulso, setItemAvulso] = useState({ produtoId: '', quantidade: 1 });
+
   async function confirmarExclusao() {
     if (!confirmDelete.id) return;
     try {
@@ -29,47 +34,45 @@ export default function Products() {
     nome: '', preco: '', estoque: '', categoria: '',
   });
 
-  const [formVenda, setFormVenda] = useState({
-    produtoId: '', quantidade: 1, cliente: '',
-  });
-
   useEffect(() => {
     carregarDados();
   }, []);
 
   async function carregarDados() {
     try {
-      const [prod, ven, cli] = await Promise.all([
+      const [prod, ven, cli, venItens] = await Promise.all([
         api.get('produtos'),
         api.get('vendas'),
-        api.get('clientes')
+        api.get('clientes'),
+        api.get('vendas_itens')
       ]);
+      
+      // Compor vendas com itens
+      const vendasComItens = ven.map(v => {
+        const itens = venItens.filter(i => i.venda_id === v.id);
+        return { ...v, itens };
+      });
+      
       setProdutos(prod);
-      setVendas(ven);
+      setVendas(vendasComItens);
       setClientes(cli);
     } catch (e) {
       console.error(e);
     }
   }
 
-  // Produto selecionado para venda
-  const produtoVenda = useMemo(() => {
-    return produtos.find((p) => p.id === formVenda.produtoId);
-  }, [produtos, formVenda.produtoId]);
-
-  const totalVenda = produtoVenda
-    ? produtoVenda.preco * formVenda.quantidade
-    : 0;
-
   // Estatísticas
   const stats = useMemo(() => {
     const totalProdutos = produtos.length;
     const totalEstoque = produtos.reduce((sum, p) => sum + Number(p.estoque), 0);
     const estoquesBaixos = produtos.filter((p) => p.estoque <= 5).length;
-    // O banco salva preco_unitario e valor_total
     const totalVendas = vendas.reduce((sum, v) => sum + Number(v.valor_total || 0), 0);
     return { totalProdutos, totalEstoque, estoquesBaixos, totalVendas };
   }, [produtos, vendas]);
+
+  const totalCarrinho = useMemo(() => {
+    return carrinhoVenda.reduce((sum, item) => sum + item.total, 0);
+  }, [carrinhoVenda]);
 
   function getStockLevel(estoque) {
     if (estoque > 10) return 'high';
@@ -121,56 +124,92 @@ export default function Products() {
     setConfirmDelete({ isOpen: true, id });
   }
 
+  // ===== VENDA MULTI-PRODUTO =====
   function abrirVenda() {
-    setFormVenda({
-      produtoId: produtos.find(p => p.estoque > 0)?.id || '',
-      quantidade: 1,
-      cliente: '',
-    });
+    setCarrinhoVenda([]);
+    setClienteVenda('');
+    setItemAvulso({ produtoId: '', quantidade: 1 });
     setModalVenda(true);
+  }
+
+  function adicionarAoCarrinho() {
+    if (!itemAvulso.produtoId || itemAvulso.quantidade < 1) return;
+    const prod = produtos.find(p => p.id === itemAvulso.produtoId);
+    if (!prod) return;
+
+    // Verificar estoque considerando o que já está no carrinho
+    const jaNoCarrinho = carrinhoVenda
+      .filter(c => c.produto_id === prod.id)
+      .reduce((sum, c) => sum + c.quantidade, 0);
+
+    if (prod.estoque < jaNoCarrinho + itemAvulso.quantidade) {
+      setAlertMessage(`Estoque insuficiente! Disponível: ${prod.estoque - jaNoCarrinho}`);
+      return;
+    }
+
+    const novoItem = {
+      produto_id: prod.id,
+      produto_nome: prod.nome,
+      quantidade: itemAvulso.quantidade,
+      preco_unitario: Number(prod.preco),
+      total: Number(prod.preco) * itemAvulso.quantidade
+    };
+
+    setCarrinhoVenda(prev => [...prev, novoItem]);
+    setItemAvulso({ produtoId: '', quantidade: 1 });
+  }
+
+  function removerDoCarrinho(index) {
+    setCarrinhoVenda(prev => prev.filter((_, i) => i !== index));
   }
 
   async function realizarVenda(e) {
     e.preventDefault();
-    if (!formVenda.produtoId || formVenda.quantidade < 1) return;
-
-    const produto = produtos.find((p) => p.id === formVenda.produtoId);
-    if (!produto) return;
-
-    if (produto.estoque < formVenda.quantidade) {
-      setAlertMessage('Estoque insuficiente!');
+    if (carrinhoVenda.length === 0) {
+      setAlertMessage('Adicione pelo menos um produto à venda.');
       return;
     }
 
     try {
-      // 1. Atualizar estoque (no backend e state)
-      const novoEstoque = parseInt(produto.estoque) - parseInt(formVenda.quantidade);
-      const prodAtualizado = await api.put(`produtos/${produto.id}`, { ...produto, estoque: novoEstoque });
-      
-      // 2. Registrar Venda
-      const vendaPayload = {
-        produto_id: produto.id,
-        produto_nome: produto.nome,
-        quantidade: formVenda.quantidade,
-        preco_unitario: produto.preco,
-        valor_total: produto.preco * formVenda.quantidade,
-        cliente: formVenda.cliente || 'Venda Balcão'
-      };
-      const vendaInserida = await api.post('vendas', vendaPayload);
+      // 1. Criar venda (cabeçalho)
+      const venda = await api.post('vendas', {
+        cliente: clienteVenda || 'Venda Balcão',
+        valor_total: totalCarrinho
+      });
+
+      // 2. Criar itens e atualizar estoque
+      for (const item of carrinhoVenda) {
+        await api.post('vendas_itens', {
+          venda_id: venda.id,
+          produto_id: item.produto_id,
+          produto_nome: item.produto_nome,
+          quantidade: item.quantidade,
+          preco_unitario: item.preco_unitario,
+          valor_total: item.total
+        });
+
+        // Atualizar estoque
+        const prod = produtos.find(p => p.id === item.produto_id);
+        if (prod) {
+          const novoEstoque = parseInt(prod.estoque) - parseInt(item.quantidade);
+          await api.put(`produtos/${prod.id}`, { ...prod, estoque: novoEstoque });
+        }
+      }
       
       // 3. Gerar conta a receber
+      const descItens = carrinhoVenda.map(i => `${i.produto_nome} x${i.quantidade}`).join(', ');
       const contaPayload = {
-        descricao: `${produto.nome} x${formVenda.quantidade} - ${formVenda.cliente || 'Balcão'}`,
+        descricao: `${descItens} - ${clienteVenda || 'Balcão'}`,
         origem: 'Produto',
-        valor: vendaPayload.valor_total,
+        valor: totalCarrinho,
         data_vencimento: dataHoje(),
         status: 'recebido',
         data_recebimento: dataHoje()
       };
       await api.post('contas_receber', contaPayload);
 
-      setProdutos(prev => prev.map(p => p.id === produto.id ? prodAtualizado : p));
-      setVendas(prev => [vendaInserida, ...prev]); // reverse ordering
+      // 4. Recarregar dados
+      carregarDados();
       setModalVenda(false);
 
     } catch (e) {
@@ -280,42 +319,45 @@ export default function Products() {
       {abaAtiva === 'vendas' && (
         <div className="sales-section">
           <div className="table-container">
-            <table className="table">
-              <thead>
-                <tr>
-                  <th>Data</th>
-                  <th>Produto</th>
-                  <th>Qtd</th>
-                  <th>Preço Unit.</th>
-                  <th>Total</th>
-                  <th>Cliente</th>
-                </tr>
-              </thead>
-              <tbody>
-                {vendas.length === 0 ? (
-                  <tr>
-                    <td colSpan="6" style={{ textAlign: 'center', padding: '40px', color: 'var(--color-text-muted)' }}>
-                      Nenhuma venda registrada
-                    </td>
-                  </tr>
-                ) : (
-                  [...vendas]
-                    .sort((a,b) => new Date(b.criado_em) - new Date(a.criado_em))
-                    .map((v) => (
-                    <tr key={v.id}>
-                      <td>{formatarDataHora(v.criado_em)}</td>
-                      <td style={{ fontWeight: 500 }}>{v.produto_nome}</td>
-                      <td>{v.quantidade}</td>
-                      <td>{formatarMoeda(v.preco_unitario)}</td>
-                      <td style={{ fontWeight: 600, color: 'var(--color-gold)' }}>
+            {vendas.length === 0 ? (
+              <div className="empty-state">
+                <div className="empty-state-icon">—</div>
+                <p className="empty-state-text">Nenhuma venda registrada</p>
+              </div>
+            ) : (
+              [...vendas]
+                .sort((a,b) => new Date(b.criado_em) - new Date(a.criado_em))
+                .map((v) => (
+                  <div key={v.id} className="sale-card" style={{ 
+                    background: 'var(--color-dark-card)', 
+                    border: '1px solid var(--color-dark-border)', 
+                    borderRadius: '12px', 
+                    padding: '16px', 
+                    marginBottom: '12px',
+                    animation: 'slideInUp 0.3s ease forwards'
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                      <div>
+                        <span style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>{formatarDataHora(v.criado_em)}</span>
+                        <span style={{ marginLeft: '12px', fontWeight: 500 }}>{v.cliente || 'Venda Balcão'}</span>
+                      </div>
+                      <span style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--color-gold)' }}>
                         {formatarMoeda(v.valor_total)}
-                      </td>
-                      <td>{v.cliente}</td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+                      </span>
+                    </div>
+                    {v.itens && v.itens.length > 0 && (
+                      <div style={{ borderTop: '1px solid var(--color-border)', paddingTop: '10px' }}>
+                        {v.itens.map((item, idx) => (
+                          <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', padding: '4px 0', color: 'var(--color-text-secondary)' }}>
+                            <span>{item.produto_nome} x{item.quantidade}</span>
+                            <span>{formatarMoeda(item.valor_total)}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))
+            )}
           </div>
         </div>
       )}
@@ -388,11 +430,11 @@ export default function Products() {
         </form>
       </Modal>
 
-      {/* Modal Venda */}
+      {/* Modal Venda Multi-Produto */}
       <Modal
         isOpen={modalVenda}
         onClose={() => setModalVenda(false)}
-        title="Registrar Venda"
+        title="Nova Venda"
         footer={
           <>
             <button className="btn btn-secondary" onClick={() => setModalVenda(false)}>Cancelar</button>
@@ -402,72 +444,89 @@ export default function Products() {
       >
         <form onSubmit={realizarVenda}>
           <div className="form-group">
-            <label className="form-label">Produto *</label>
+            <label className="form-label">Cliente (opcional)</label>
             <select
               className="form-select"
-              value={formVenda.produtoId}
-              onChange={(e) => setFormVenda({ ...formVenda, produtoId: e.target.value })}
-              required
+              value={clienteVenda}
+              onChange={(e) => setClienteVenda(e.target.value)}
             >
-              <option value="">Selecione um produto</option>
-              {produtos.filter((p) => p.estoque > 0).map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.nome} — {formatarMoeda(p.preco)} (estoque: {p.estoque})
-                </option>
+              <option value="">Consumidor Expresso / Balcão</option>
+              {clientes.map(c => (
+                <option key={c.id} value={c.nome}>{c.nome}</option>
               ))}
             </select>
           </div>
 
-          <div className="form-row">
-            <div className="form-group">
-              <label className="form-label">Quantidade *</label>
-              <input
-                className="form-input"
-                type="number"
-                min="1"
-                max={produtoVenda?.estoque || 999}
-                value={formVenda.quantidade}
-                onChange={(e) =>
-                  setFormVenda({ ...formVenda, quantidade: parseInt(e.target.value) || 1 })
-                }
-                required
-              />
+          <div style={{ borderTop: '1px solid var(--color-border)', paddingTop: '16px', marginTop: '16px' }}>
+            <h3 style={{ fontSize: '1.05rem', marginBottom: '12px' }}>Adicionar Produtos</h3>
+            
+            <div className="form-row" style={{ alignItems: 'flex-end', marginBottom: '16px' }}>
+              <div className="form-group" style={{ flex: '2' }}>
+                <label className="form-label">Produto</label>
+                <select
+                  className="form-select"
+                  value={itemAvulso.produtoId}
+                  onChange={(e) => setItemAvulso({ ...itemAvulso, produtoId: e.target.value })}
+                >
+                  <option value="">Selecione um produto...</option>
+                  {produtos.filter((p) => p.estoque > 0).map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.nome} — {formatarMoeda(p.preco)} (estoque: {p.estoque})
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="form-group" style={{ flex: '1' }}>
+                <label className="form-label">Qtd</label>
+                <input
+                  className="form-input"
+                  type="number"
+                  min="1"
+                  value={itemAvulso.quantidade}
+                  onChange={(e) => setItemAvulso({ ...itemAvulso, quantidade: parseInt(e.target.value) || 1 })}
+                />
+              </div>
+              <div className="form-group">
+                <button type="button" className="btn btn-secondary" onClick={adicionarAoCarrinho}>Adicionar</button>
+              </div>
             </div>
-            <div className="form-group">
-              <label className="form-label">Cliente (opcional)</label>
-              <select
-                className="form-select"
-                value={formVenda.cliente}
-                onChange={(e) => setFormVenda({ ...formVenda, cliente: e.target.value })}
-              >
-                <option value="">Consumidor Expresso / Balcão</option>
-                {clientes.map(c => (
-                  <option key={c.id} value={c.nome}>{c.nome}</option>
-                ))}
-              </select>
-            </div>
-          </div>
 
-          {produtoVenda && (
-            <div className="sale-summary">
-              <div className="sale-summary-row">
-                <span>Produto:</span>
-                <span>{produtoVenda.nome}</span>
+            {carrinhoVenda.length > 0 ? (
+              <div style={{ background: 'var(--color-bg-secondary)', borderRadius: '8px', padding: '12px' }}>
+                <table style={{ width: '100%', fontSize: '0.9rem', borderCollapse: 'collapse' }}>
+                  <thead>
+                    <tr style={{ borderBottom: '1px solid var(--color-border)', color: 'var(--color-text-muted)' }}>
+                      <th style={{ textAlign: 'left', paddingBottom: '8px' }}>Produto</th>
+                      <th style={{ textAlign: 'center', paddingBottom: '8px' }}>Qtd</th>
+                      <th style={{ textAlign: 'right', paddingBottom: '8px' }}>Subtotal</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {carrinhoVenda.map((item, i) => (
+                      <tr key={i} style={{ borderBottom: '1px solid var(--color-border)' }}>
+                        <td style={{ padding: '8px 0' }}>{item.produto_nome}</td>
+                        <td style={{ padding: '8px 0', textAlign: 'center' }}>{item.quantidade}</td>
+                        <td style={{ padding: '8px 0', textAlign: 'right' }}>{formatarMoeda(item.total)}</td>
+                        <td style={{ padding: '8px 0', textAlign: 'right' }}>
+                          <button type="button" onClick={() => removerDoCarrinho(i)} style={{background:'none', border:'none', color:'red', cursor:'pointer'}} title="Remover">×</button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '12px', paddingTop: '12px', borderTop: '1px dashed var(--color-border)' }}>
+                  <strong style={{ color: 'var(--color-gold)' }}>Total da Venda:</strong>
+                  <strong style={{ color: 'var(--color-gold)', fontSize: '1.1rem' }}>{formatarMoeda(totalCarrinho)}</strong>
+                </div>
               </div>
-              <div className="sale-summary-row">
-                <span>Preço unitário:</span>
-                <span>{formatarMoeda(produtoVenda.preco)}</span>
+            ) : (
+              <div style={{ padding: '24px', textAlign: 'center', color: 'var(--color-text-muted)', fontSize: '0.9rem', border: '1px dashed var(--color-border)', borderRadius: '8px' }}>
+                Nenhum produto adicionado ao carrinho.
               </div>
-              <div className="sale-summary-row">
-                <span>Quantidade:</span>
-                <span>{formVenda.quantidade}</span>
-              </div>
-              <div className="sale-summary-row total">
-                <span>Total:</span>
-                <span>{formatarMoeda(totalVenda)}</span>
-              </div>
-            </div>
-          )}
+            )}
+          </div>
         </form>
       </Modal>
 

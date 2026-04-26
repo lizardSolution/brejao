@@ -58,6 +58,15 @@ CREATE TABLE IF NOT EXISTS agendamentos (
   criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE IF NOT EXISTS agendamentos_servicos (
+  id SERIAL PRIMARY KEY,
+  agendamento_id UUID REFERENCES agendamentos(id) ON DELETE CASCADE,
+  servico_id UUID REFERENCES servicos(id) ON DELETE SET NULL,
+  nome VARCHAR(100) NOT NULL,
+  preco DECIMAL(10,2) NOT NULL,
+  criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 CREATE TABLE IF NOT EXISTS agendamentos_itens (
   id SERIAL PRIMARY KEY,
   agendamento_id UUID REFERENCES agendamentos(id) ON DELETE CASCADE,
@@ -92,11 +101,17 @@ CREATE TABLE IF NOT EXISTS contas_receber (
 
 CREATE TABLE IF NOT EXISTS vendas (
   id UUID PRIMARY KEY,
+  cliente VARCHAR(100),
+  valor_total DECIMAL(10,2) NOT NULL DEFAULT 0,
+  criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS vendas_itens (
+  id SERIAL PRIMARY KEY,
+  venda_id UUID REFERENCES vendas(id) ON DELETE CASCADE,
   produto_id UUID REFERENCES produtos(id) ON DELETE SET NULL,
   produto_nome VARCHAR(100) NOT NULL,
   quantidade INT NOT NULL,
   preco_unitario DECIMAL(10,2) NOT NULL,
-  valor_total DECIMAL(10,2) NOT NULL,
-  cliente VARCHAR(100),
-  criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  valor_total DECIMAL(10,2) NOT NULL
 );

@@ -16,14 +16,14 @@ const port = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
-const hasAutoIncrement = (tableName) => ['agendamentos_itens'].includes(tableName);
+const hasAutoIncrement = (tableName) => ['agendamentos_itens', 'agendamentos_servicos', 'vendas_itens'].includes(tableName);
 const hasSoftDelete = (tableName) => ['agendamentos'].includes(tableName);
 const hasAudit = (tableName) => ['agendamentos'].includes(tableName);
 
 const tableToModuleMap = {
   usuarios: 'cadastros', barbeiros: 'cadastros', clientes: 'cadastros', servicos: 'cadastros',
-  agendamentos: 'agendamentos', agendamentos_itens: 'agendamentos',
-  produtos: 'produtos', vendas: 'produtos',
+  agendamentos: 'agendamentos', agendamentos_itens: 'agendamentos', agendamentos_servicos: 'agendamentos',
+  produtos: 'produtos', vendas: 'produtos', vendas_itens: 'produtos',
   contas_pagar: 'financeiro', contas_receber: 'financeiro'
 };
 
@@ -218,7 +218,8 @@ app.post('/api/login', async (req, res) => {
 // Rotas Genéricas CRUD
 const tables = [
   'usuarios', 'barbeiros', 'clientes', 'servicos', 'produtos', 
-  'agendamentos', 'agendamentos_itens', 'contas_pagar', 'contas_receber', 'vendas'
+  'agendamentos', 'agendamentos_itens', 'agendamentos_servicos',
+  'contas_pagar', 'contas_receber', 'vendas', 'vendas_itens'
 ];
 
 tables.forEach(table => {

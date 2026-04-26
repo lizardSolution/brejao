@@ -5,7 +5,7 @@ WORKDIR /app
 
 # Copiar arquivos de dependência primeiro (aproveita cache do Docker)
 COPY package.json package-lock.json ./
-RUN npm install --ignore-scripts
+RUN npm ci
 
 # Copiar código-fonte e fazer build
 COPY . .
@@ -18,7 +18,7 @@ WORKDIR /app
 
 # Copiar package files e instalar apenas produção
 COPY package.json package-lock.json ./
-RUN npm install --omit=dev --ignore-scripts
+RUN npm ci --omit=dev
 
 # Copiar servidor backend
 COPY server/ ./server/

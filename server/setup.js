@@ -97,6 +97,55 @@ async function setup() {
       console.log('Serviços padrão criados.');
     }
 
+    // Migração: agendamentos legado -> agendamentos_servicos
+    const legacyAg = await clientDb.query(`
+      SELECT a.id, a.servico, a.valor_servico 
+      FROM agendamentos a 
+      WHERE a.servico IS NOT NULL 
+        AND a.servico != ''
+        AND NOT EXISTS (SELECT 1 FROM agendamentos_servicos ags WHERE ags.agendamento_id = a.id)
+    `);
+    if (legacyAg.rowCount > 0) {
+      console.log(`Migrando ${legacyAg.rowCount} agendamento(s) legado para agendamentos_servicos...`);
+      for (const row of legacyAg.rows) {
+        // Tenta encontrar o servico_id correspondente pelo nome
+        const srvQ = await clientDb.query('SELECT id FROM servicos WHERE nome = $1', [row.servico]);
+        const srvId = srvQ.rows.length > 0 ? srvQ.rows[0].id : null;
+        await clientDb.query(
+          'INSERT INTO agendamentos_servicos (agendamento_id, servico_id, nome, preco) VALUES ($1, $2, $3, $4)',
+          [row.id, srvId, row.servico, row.valor_servico || 0]
+        );
+      }
+      console.log('Migração de serviços concluída.');
+    }
+
+    // Migração: vendas legado (colunas produto_* na tabela vendas) -> vendas_itens
+    // Verifica se a tabela vendas ainda tem a coluna legado 'produto_nome'
+    const colCheck = await clientDb.query(`
+      SELECT column_name FROM information_schema.columns 
+      WHERE table_name = 'vendas' AND column_name = 'produto_nome'
+    `);
+    if (colCheck.rowCount > 0) {
+      console.log('Detectada estrutura legado em vendas. Migrando...');
+      // Buscar vendas com dados legado
+      const legacyVendas = await clientDb.query('SELECT * FROM vendas WHERE produto_nome IS NOT NULL');
+      for (const v of legacyVendas.rows) {
+        // Criar item na vendas_itens
+        await clientDb.query(
+          'INSERT INTO vendas_itens (venda_id, produto_id, produto_nome, quantidade, preco_unitario, valor_total) VALUES ($1, $2, $3, $4, $5, $6)',
+          [v.id, v.produto_id, v.produto_nome, v.quantidade, v.preco_unitario, v.valor_total]
+        );
+      }
+      // Dropar colunas legado
+      await clientDb.query('ALTER TABLE vendas DROP COLUMN IF EXISTS produto_id');
+      await clientDb.query('ALTER TABLE vendas DROP COLUMN IF EXISTS produto_nome');
+      await clientDb.query('ALTER TABLE vendas DROP COLUMN IF EXISTS quantidade');
+      await clientDb.query('ALTER TABLE vendas DROP COLUMN IF EXISTS preco_unitario');
+      if (legacyVendas.rowCount > 0) {
+        console.log(`Migradas ${legacyVendas.rowCount} venda(s) legado para vendas_itens.`);
+      }
+    }
+
     console.log('✨ Setup finalizado com sucesso! O banco está pronto para uso.');
   } catch (err) {
     console.error('Erro na criação das tabelas:', err);

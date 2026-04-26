@@ -1,25 +1,25 @@
 services:
   db:
     image: postgres:16-alpine
-    container_name: gmscheduler-db
+    container_name: lizardsolutions-db
     restart: unless-stopped
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: gmscheduler
+      POSTGRES_DB: LizardSolutions
     ports:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
       interval: 5s
       timeout: 5s
       retries: 10
 
   app:
     build: .
-    container_name: gmscheduler-app
+    container_name: lizardsolutions-app
     restart: unless-stopped
     ports:
       - "3000:3000"
@@ -29,7 +29,7 @@ services:
       DB_PORT: 5432
       DB_USER: postgres
       DB_PASSWORD: postgres
-      DB_NAME: gmscheduler
+      DB_NAME: LizardSolutions
     depends_on:
       db:
         condition: service_healthy

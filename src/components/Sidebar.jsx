@@ -42,7 +42,16 @@ export default function Sidebar() {
 
       <aside className={`sidebar ${mobileOpen ? 'open' : ''}`}>
         <div className="sidebar-header">
-          <div className="sidebar-logo">LS</div>
+          <img 
+            src="/img/logo.png" 
+            alt="Logo" 
+            style={{ width: '40px', height: '40px', objectFit: 'contain', borderRadius: '8px' }}
+            onError={(e) => {
+              e.target.style.display = 'none';
+              e.target.nextSibling.style.display = 'flex';
+            }}
+          />
+          <div className="sidebar-logo" style={{ display: 'none' }}>LS</div>
           <div className="sidebar-brand">
             <span className="sidebar-brand-name">Lizard Solutions</span>
             <span className="sidebar-brand-sub">Sistema de Gestão</span>
