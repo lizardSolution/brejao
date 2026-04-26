@@ -19,7 +19,7 @@ export default function Appointments() {
   const [modalAberto, setModalAberto] = useState(false);
   const [filtroStatus, setFiltroStatus] = useState('todos');
   const [filtroBarbeiro, setFiltroBarbeiro] = useState('todos');
-  
+
   const [editandoId, setEditandoId] = useState(null);
   const [produtoAvulso, setProdutoAvulso] = useState({ id: '', quantidade: 1 });
   const [servicoAvulso, setServicoAvulso] = useState('');
@@ -47,7 +47,7 @@ export default function Appointments() {
           produtos_vinculados: prev.produtos_vinculados.filter((_, i) => i !== idx)
         }));
         setConfirmDelete({ isOpen: false, tipo: null, id: null, index: null });
-      } catch(e) { console.error(e); }
+      } catch (e) { console.error(e); }
     } else if (confirmDelete.tipo === 'servico_vinculado' && confirmDelete.index !== null) {
       const idx = confirmDelete.index;
       const item = formData.servicos_vinculados[idx];
@@ -60,13 +60,13 @@ export default function Appointments() {
           servicos_vinculados: prev.servicos_vinculados.filter((_, i) => i !== idx)
         }));
         setConfirmDelete({ isOpen: false, tipo: null, id: null, index: null });
-      } catch(e) { console.error(e); }
+      } catch (e) { console.error(e); }
     }
   }
 
   const { usuario: user } = useAuth();
-  const perms = (user?.perfil === 'admin' || !user?.permissoes) 
-    ? { acessar: true, incluir: true, alterar: true, excluir: true } 
+  const perms = (user?.perfil === 'admin' || !user?.permissoes)
+    ? { acessar: true, incluir: true, alterar: true, excluir: true }
     : (user.permissoes.agendamentos || { acessar: false, incluir: false, alterar: false, excluir: false });
 
   const [formData, setFormData] = useState({
@@ -96,20 +96,20 @@ export default function Appointments() {
         api.get('agendamentos_itens'),
         api.get('agendamentos_servicos')
       ]);
-      
+
       const agComItens = ag.map(a => {
         // Produtos vinculados
         const meusItens = itens.filter(i => i.agendamento_id === a.id);
         const pv = meusItens.map(i => {
-           const pFull = prod.find(p => p.id === i.produto_id) || {};
-           return {
-              id: i.id,
-              produto_id: i.produto_id,
-              nome: pFull.nome || 'Desconhecido',
-              quantidade: i.quantidade,
-              preco: Number(i.preco_unitario),
-              total: Number(i.valor_total)
-           };
+          const pFull = prod.find(p => p.id === i.produto_id) || {};
+          return {
+            id: i.id,
+            produto_id: i.produto_id,
+            nome: pFull.nome || 'Desconhecido',
+            quantidade: i.quantidade,
+            preco: Number(i.preco_unitario),
+            total: Number(i.valor_total)
+          };
         });
         // Serviços vinculados
         const meusServicos = agServicos.filter(s => s.agendamento_id === a.id);
@@ -206,7 +206,7 @@ export default function Appointments() {
       telefone: agendamento.telefone || '',
       barbeiro: agendamento.barbeiro,
       data: bdDate,
-      hora: agendamento.hora ? agendamento.hora.slice(0,5) : '',
+      hora: agendamento.hora ? agendamento.hora.slice(0, 5) : '',
       observacoes: agendamento.observacoes || '',
       servicos_vinculados: agendamento.servicos_vinculados || [],
       produtos_vinculados: agendamento.produtos_vinculados || []
@@ -286,12 +286,12 @@ export default function Appointments() {
   function removerProdutoVinculado(index) {
     const item = formData.produtos_vinculados[index];
     if (item.id) {
-       setConfirmDelete({ isOpen: true, tipo: 'produto_vinculado', index });
+      setConfirmDelete({ isOpen: true, tipo: 'produto_vinculado', index });
     } else {
-       setFormData(prev => ({
-         ...prev,
-         produtos_vinculados: prev.produtos_vinculados.filter((_, i) => i !== index)
-       }));
+      setFormData(prev => ({
+        ...prev,
+        produtos_vinculados: prev.produtos_vinculados.filter((_, i) => i !== index)
+      }));
     }
   }
 
@@ -346,15 +346,15 @@ export default function Appointments() {
 
       // Sincronizar produtos novos inseridos
       for (const item of formData.produtos_vinculados) {
-          if (!item.id) {
-             await api.post('agendamentos_itens', {
-                agendamento_id: agendamentoId,
-                produto_id: item.produto_id,
-                quantidade: item.quantidade,
-                preco_unitario: item.preco,
-                valor_total: item.total
-             });
-          }
+        if (!item.id) {
+          await api.post('agendamentos_itens', {
+            agendamento_id: agendamentoId,
+            produto_id: item.produto_id,
+            quantidade: item.quantidade,
+            preco_unitario: item.preco,
+            valor_total: item.total
+          });
+        }
       }
 
       // Recarrega todos pra garantir a composição correta no state
@@ -371,7 +371,7 @@ export default function Appointments() {
 
     try {
       const payload = { status: novoStatus };
-      
+
       // Update local state optimistic
       setAgendamentos((prev) => prev.map((a) => (a.id === id ? { ...a, status: novoStatus } : a)));
 
@@ -381,15 +381,15 @@ export default function Appointments() {
       // Checkout Logic
       if (novoStatus === 'concluido' && agendamento.status !== 'concluido') {
         const bdDate = agendamento.data.includes('T') ? agendamento.data.split('T')[0] : agendamento.data;
-        
+
         // Calcular total dos produtos
         const pv = agendamento.produtos_vinculados || [];
         const totalProdutos = pv.reduce((sum, p) => sum + Number(p.total), 0);
-        
+
         // Calcular total dos serviços
         const sv = agendamento.servicos_vinculados || [];
         const totalServicos = sv.reduce((sum, s) => sum + Number(s.preco), 0);
-        
+
         // 1. Dar baixa no estoque e gerar vendas individuais pra cada produto ligado
         if (pv.length > 0) {
           // Criar uma venda agrupada
@@ -403,7 +403,7 @@ export default function Appointments() {
             if (pFull) {
               const novoEstoque = parseInt(pFull.estoque) - parseInt(item.quantidade);
               await api.put(`produtos/${pFull.id}`, { ...pFull, estoque: novoEstoque });
-              
+
               await api.post('vendas_itens', {
                 venda_id: venda.id,
                 produto_id: pFull.id,
@@ -415,7 +415,7 @@ export default function Appointments() {
             }
           }
         }
-        
+
         // Caso precisemos recarregar produtos na tela por segurança:
         const novosProdutos = await api.get('produtos');
         setProdutos(novosProdutos);
@@ -457,7 +457,7 @@ export default function Appointments() {
     <div className="appointments-page">
       <div className="page-header">
         <h1 className="page-title">
-           <span>Agendamentos</span>
+          <span>Agendamentos</span>
         </h1>
         {perms.incluir && (
           <button className="btn btn-primary" onClick={abrirNovoAgendamento}>
@@ -491,9 +491,8 @@ export default function Appointments() {
             return (
               <div
                 key={i}
-                className={`calendar-day ${dia.foraDoMes ? 'fora-do-mes' : ''} ${
-                  chave === hojeChave ? 'hoje' : ''
-                } ${chave === dataSelecionada ? 'selecionado' : ''}`}
+                className={`calendar-day ${dia.foraDoMes ? 'fora-do-mes' : ''} ${chave === hojeChave ? 'hoje' : ''
+                  } ${chave === dataSelecionada ? 'selecionado' : ''}`}
                 onClick={() => {
                   setDataSelecionada(chave);
                 }}
@@ -562,10 +561,10 @@ export default function Appointments() {
               const pv = a.produtos_vinculados || [];
               const sv = a.servicos_vinculados || [];
               const showDblClickTip = a.status !== 'concluido' && a.status !== 'cancelado';
-              
+
               // Nome dos serviços para exibição
-              const nomeServicos = sv.length > 0 
-                ? sv.map(s => s.nome).join(' + ') 
+              const nomeServicos = sv.length > 0
+                ? sv.map(s => s.nome).join(' + ')
                 : a.servico;
               const totalServicos = sv.length > 0
                 ? sv.reduce((sum, s) => sum + Number(s.preco), 0)
@@ -580,7 +579,7 @@ export default function Appointments() {
                   title={showDblClickTip ? "Duplo clique para editar ou adicionar produtos" : ""}
                 >
                   <div className="appointment-time">
-                    <span className="appointment-time-value">{a.hora ? a.hora.slice(0,5) : ''}</span>
+                    <span className="appointment-time-value">{a.hora ? a.hora.slice(0, 5) : ''}</span>
                   </div>
                   <div className="appointment-info">
                     <span className="appointment-client">{a.cliente_nome}</span>
@@ -588,16 +587,16 @@ export default function Appointments() {
                       <span className="appointment-detail-item">{nomeServicos}</span>
                       <span className="appointment-detail-item">{a.barbeiro}</span>
                       <span className="appointment-detail-item">
-                         {formatarMoeda(totalServicos)}
-                        {pv.length > 0 && <span style={{color: 'var(--color-gold)', marginLeft: 4}}>+ Produtos</span>}
+                        {formatarMoeda(totalServicos)}
+                        {pv.length > 0 && <span style={{ color: 'var(--color-gold)', marginLeft: 4 }}>+ Produtos</span>}
                       </span>
                       {a.telefone && (
-                         <span className="appointment-detail-item">{a.telefone}</span>
+                        <span className="appointment-detail-item">{a.telefone}</span>
                       )}
                     </div>
                     {a.observacoes && (
                       <span className="appointment-detail-item" style={{ marginTop: '4px', fontStyle: 'italic', opacity: 0.7 }}>
-                         {a.observacoes}
+                        {a.observacoes}
                       </span>
                     )}
                     {(sv.length > 1 || pv.length > 0) && (
@@ -621,16 +620,16 @@ export default function Appointments() {
                         <option value="cancelado">Cancelado</option>
                       </select>
                     ) : (
-                      <span className="appointment-status-locked" style={{margin:'0 8px', fontSize:'0.9rem', color:'#888'}}>—</span>
+                      <span className="appointment-status-locked" style={{ margin: '0 8px', fontSize: '0.9rem', color: '#888' }}>—</span>
                     )}
                     {(showDblClickTip && perms.alterar) && (
-                       <button
+                      <button
                         className="btn btn-secondary btn-sm"
                         onClick={() => abrirEditarAgendamento(a)}
                         title="Editar/Adicionar Produtos"
-                       >
-                         Editar
-                       </button>
+                      >
+                        Editar
+                      </button>
                     )}
                     {perms.excluir && (
                       <button
@@ -765,11 +764,11 @@ export default function Appointments() {
             <h3 style={{ fontSize: '1.1rem', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
               Serviços *
             </h3>
-            
+
             <div className="form-row" style={{ alignItems: 'flex-end', marginBottom: '16px' }}>
               <div className="form-group" style={{ flex: '2' }}>
                 <label className="form-label">Adicionar Serviço</label>
-                <select 
+                <select
                   className="form-select"
                   value={servicoAvulso}
                   onChange={(e) => setServicoAvulso(e.target.value)}
@@ -803,13 +802,13 @@ export default function Appointments() {
                         <td style={{ padding: '8px 0' }}>{s.nome}</td>
                         <td style={{ padding: '8px 0', textAlign: 'right' }}>{formatarMoeda(s.preco)}</td>
                         <td style={{ padding: '8px 0', textAlign: 'right' }}>
-                          <button type="button" onClick={() => removerServicoVinculado(i)} style={{background:'none', border:'none', color:'red', cursor:'pointer'}} title="Remover">×</button>
+                          <button type="button" onClick={() => removerServicoVinculado(i)} style={{ background: 'none', border: 'none', color: 'red', cursor: 'pointer' }} title="Remover">×</button>
                         </td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
-                 
+
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '12px', paddingTop: '12px', borderTop: '1px dashed var(--color-border)' }}>
                   <strong>Total em Serviços:</strong>
                   <strong>{formatarMoeda(totalServicosSim)}</strong>
@@ -830,11 +829,11 @@ export default function Appointments() {
               Vincular Produtos
               <span style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', fontWeight: 400 }}>(opcional)</span>
             </h3>
-            
+
             <div className="form-row" style={{ alignItems: 'flex-end', marginBottom: '16px' }}>
               <div className="form-group" style={{ flex: '2' }}>
                 <label className="form-label">Produto</label>
-                <select 
+                <select
                   className="form-select"
                   value={produtoAvulso.id}
                   onChange={(e) => setProdutoAvulso({ ...produtoAvulso, id: e.target.value })}
@@ -849,10 +848,10 @@ export default function Appointments() {
               </div>
               <div className="form-group" style={{ flex: '1' }}>
                 <label className="form-label">Qtd.</label>
-                <input 
-                  type="number" 
+                <input
+                  type="number"
                   min="1"
-                  className="form-input" 
+                  className="form-input"
                   value={produtoAvulso.quantidade}
                   onChange={(e) => setProdutoAvulso({ ...produtoAvulso, quantidade: parseInt(e.target.value) || 1 })}
                 />
@@ -864,33 +863,33 @@ export default function Appointments() {
 
             {formData.produtos_vinculados.length > 0 && (
               <div style={{ background: 'var(--color-bg-secondary)', borderRadius: '8px', padding: '12px' }}>
-                 <table style={{ width: '100%', fontSize: '0.9rem', borderCollapse: 'collapse' }}>
-                   <thead>
-                     <tr style={{ borderBottom: '1px solid var(--color-border)', color: 'var(--color-text-muted)' }}>
-                       <th style={{ textAlign: 'left', paddingBottom: '8px' }}>Item</th>
-                       <th style={{ textAlign: 'center', paddingBottom: '8px' }}>Qtd</th>
-                       <th style={{ textAlign: 'right', paddingBottom: '8px' }}>Subtotal</th>
-                       <th></th>
-                     </tr>
-                   </thead>
-                   <tbody>
-                     {formData.produtos_vinculados.map((p, i) => (
-                       <tr key={i} style={{ borderBottom: '1px solid var(--color-border)' }}>
-                         <td style={{ padding: '8px 0' }}>{p.nome}</td>
-                         <td style={{ padding: '8px 0', textAlign: 'center' }}>{p.quantidade}</td>
-                         <td style={{ padding: '8px 0', textAlign: 'right' }}>{formatarMoeda(p.total)}</td>
-                         <td style={{ padding: '8px 0', textAlign: 'right' }}>
-                           <button type="button" onClick={() => removerProdutoVinculado(i)} style={{background:'none', border:'none', color:'red', cursor:'pointer'}} title="Remover">×</button>
-                         </td>
-                       </tr>
-                     ))}
-                   </tbody>
-                 </table>
-                 
-                 <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '12px', paddingTop: '12px', borderTop: '1px dashed var(--color-border)' }}>
-                   <strong>Total em Produtos:</strong>
-                   <strong>{formatarMoeda(totalProdutosSim)}</strong>
-                 </div>
+                <table style={{ width: '100%', fontSize: '0.9rem', borderCollapse: 'collapse' }}>
+                  <thead>
+                    <tr style={{ borderBottom: '1px solid var(--color-border)', color: 'var(--color-text-muted)' }}>
+                      <th style={{ textAlign: 'left', paddingBottom: '8px' }}>Item</th>
+                      <th style={{ textAlign: 'center', paddingBottom: '8px' }}>Qtd</th>
+                      <th style={{ textAlign: 'right', paddingBottom: '8px' }}>Subtotal</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {formData.produtos_vinculados.map((p, i) => (
+                      <tr key={i} style={{ borderBottom: '1px solid var(--color-border)' }}>
+                        <td style={{ padding: '8px 0' }}>{p.nome}</td>
+                        <td style={{ padding: '8px 0', textAlign: 'center' }}>{p.quantidade}</td>
+                        <td style={{ padding: '8px 0', textAlign: 'right' }}>{formatarMoeda(p.total)}</td>
+                        <td style={{ padding: '8px 0', textAlign: 'right' }}>
+                          <button type="button" onClick={() => removerProdutoVinculado(i)} style={{ background: 'none', border: 'none', color: 'red', cursor: 'pointer' }} title="Remover">×</button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '12px', paddingTop: '12px', borderTop: '1px dashed var(--color-border)' }}>
+                  <strong>Total em Produtos:</strong>
+                  <strong>{formatarMoeda(totalProdutosSim)}</strong>
+                </div>
               </div>
             )}
 
@@ -917,12 +916,12 @@ export default function Appointments() {
         }
       >
         <p style={{ marginTop: '10px', fontSize: '1.1rem', color: 'var(--color-text)' }}>
-          {confirmDelete.tipo === 'agendamento' 
-            ? 'Tem certeza que deseja excluir este agendamento?' 
+          {confirmDelete.tipo === 'agendamento'
+            ? 'Tem certeza que deseja excluir este agendamento?'
             : confirmDelete.tipo === 'servico_vinculado'
               ? 'Deseja remover este serviço do agendamento?'
               : 'Deseja remover este produto do agendamento agora?'}
-          <br/><br/>
+          <br /><br />
           <span style={{ fontSize: '0.9rem', color: 'var(--color-text-muted)' }}>Esta ação não pode ser desfeita.</span>
         </p>
       </Modal>

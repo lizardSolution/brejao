@@ -9,15 +9,17 @@ RETRIES=0
 
 until node -e "
   const pg = require('pg');
-  const client = new pg.Client({
-    host: process.env.DB_HOST || 'localhost',
-    port: process.env.DB_PORT || 5432,
-    user: process.env.DB_USER || 'postgres',
-    password: process.env.DB_PASSWORD || 'postgres',
-    database: 'postgres'
-  });
-  client.connect().then(() => { client.end(); process.exit(0); }).catch(() => process.exit(1));
-" 2>/dev/null; do
+  const client = process.env.DATABASE_URL
+    ? new pg.Client({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } })
+    : new pg.Client({
+        host: process.env.DB_HOST || 'localhost',
+        port: process.env.DB_PORT || 5432,
+        user: process.env.DB_USER || 'postgres',
+        password: process.env.DB_PASSWORD || 'postgres',
+        database: 'postgres'
+      });
+  client.connect().then(() => { client.end(); process.exit(0); }).catch((err) => { console.error(err.message); process.exit(1); });
+" > /dev/null 2>&1; do
   RETRIES=$((RETRIES + 1))
   if [ $RETRIES -ge $MAX_RETRIES ]; then
     echo "ERRO: PostgreSQL nao ficou disponivel a tempo."
