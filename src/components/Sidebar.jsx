@@ -10,7 +10,9 @@ export default function Sidebar() {
 
   const links = [
     { to: '/agendamentos', icon: '—', label: 'Agendamentos' },
+    { to: '/relatorio-agendamentos', icon: '—', label: 'Rel. Agendamentos' },
     { to: '/financeiro', icon: '—', label: 'Financeiro' },
+    { to: '/relatorio-financeiro', icon: '—', label: 'Rel. Financeiro' },
     { to: '/produtos', icon: '—', label: 'Produtos' },
     { to: '/cadastros', icon: '—', label: 'Cadastros' },
   ];

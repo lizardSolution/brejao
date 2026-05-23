@@ -3,7 +3,9 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import Sidebar from './components/Sidebar';
 import Login from './pages/Login';
 import Appointments from './pages/Appointments';
+import AppointmentsReport from './pages/AppointmentsReport';
 import Financial from './pages/Financial';
+import FinancialReport from './pages/FinancialReport';
 import Products from './pages/Products';
 import Registers from './pages/Registers';
 
@@ -45,10 +47,26 @@ function App() {
             }
           />
           <Route
+            path="/relatorio-agendamentos"
+            element={
+              <RotaProtegida>
+                <AppointmentsReport />
+              </RotaProtegida>
+            }
+          />
+          <Route
             path="/financeiro"
             element={
               <RotaProtegida>
                 <Financial />
+              </RotaProtegida>
+            }
+          />
+          <Route
+            path="/relatorio-financeiro"
+            element={
+              <RotaProtegida>
+                <FinancialReport />
               </RotaProtegida>
             }
           />
