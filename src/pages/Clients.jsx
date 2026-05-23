@@ -93,7 +93,7 @@ export default function Clients() {
               <tr>
                 <th>Nome do Cliente</th>
                 <th>Telefone</th>
-                <th>Observações</th>
+                <th className="col-hide-mobile">Observações</th>
                 <th>Ações</th>
               </tr>
             </thead>
@@ -105,7 +105,7 @@ export default function Clients() {
                   <tr key={c.id}>
                     <td style={{fontWeight: 600}}>{c.nome}</td>
                     <td>{c.telefone || '—'}</td>
-                    <td>{c.observacoes || '—'}</td>
+                    <td className="col-hide-mobile">{c.observacoes || '—'}</td>
                     <td className="actions">
                       {perms.alterar && <button className="btn btn-secondary btn-sm" onClick={() => abrirModalCliente(c)}>Editar</button>}
                       {perms.excluir && <button className="btn btn-danger btn-sm" onClick={() => excluirCliente(c.id)}>Excluir</button>}

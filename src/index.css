@@ -158,12 +158,34 @@ input, select, textarea {
   min-height: 100vh;
 }
 
+/* Container padrão para todas as páginas */
+.page-container {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+/* Proteção global contra overflow */
+.financial-page,
+.registers-page,
+.products-page,
+.appointments-page {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
 .page-content {
   flex: 1;
   margin-left: var(--sidebar-width);
   padding: var(--spacing-xl);
   min-height: 100vh;
   transition: margin-left var(--transition-base);
+  overflow-x: hidden;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .page-header {
@@ -305,6 +327,20 @@ input, select, textarea {
   font-size: var(--font-size-base);
   transition: all var(--transition-fast);
   width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+/* Inputs de data/hora: forçar largura responsiva em mobile */
+input[type="date"],
+input[type="time"],
+input[type="datetime-local"] {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+  color-scheme: dark;
 }
 
 .form-input:focus,
@@ -341,6 +377,11 @@ input, select, textarea {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: var(--spacing-md);
+  min-width: 0;
+}
+
+.form-row > * {
+  min-width: 0;
 }
 
 /* ====================== CARDS ====================== */
@@ -645,6 +686,20 @@ input, select, textarea {
   .table td {
     padding: 10px 12px;
     font-size: var(--font-size-xs);
+  }
+
+  /* Esconder colunas secundárias em mobile para evitar scroll lateral */
+  .table .col-hide-mobile {
+    display: none;
+  }
+
+  .page-header {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .page-actions {
+    flex-wrap: wrap;
   }
 }
 

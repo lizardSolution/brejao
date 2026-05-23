@@ -707,24 +707,24 @@ export default function Appointments() {
               </div>
             )}
 
-            <div className="form-row">
-              <div className="form-group">
-                <label className="form-label">Barbeiro *</label>
-                <select
-                  className="form-select"
-                  value={formData.barbeiro}
-                  onChange={(e) => setFormData({ ...formData, barbeiro: e.target.value })}
-                  required
-                >
-                  <option value="">Selecione</option>
-                  {barbeiros.filter((b) => b.ativo).map((b) => (
-                    <option key={b.id} value={b.nome}>
-                      {b.nome}
-                    </option>
-                  ))}
-                </select>
-              </div>
+            <div className="form-group">
+              <label className="form-label">Barbeiro *</label>
+              <select
+                className="form-select"
+                value={formData.barbeiro}
+                onChange={(e) => setFormData({ ...formData, barbeiro: e.target.value })}
+                required
+              >
+                <option value="">Selecione</option>
+                {barbeiros.filter((b) => b.ativo).map((b) => (
+                  <option key={b.id} value={b.nome}>
+                    {b.nome}
+                  </option>
+                ))}
+              </select>
+            </div>
 
+            <div className="form-row">
               <div className="form-group">
                 <label className="form-label">Data *</label>
                 <input

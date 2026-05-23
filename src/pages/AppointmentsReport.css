@@ -1,24 +1,32 @@
 .appointments-report-container {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
 }
 
-.filters-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 16px;
-  align-items: flex-end;
+.appointments-report-container .page-header {
+  position: relative;
 }
 
-.filter-actions {
-  display: flex;
-  justify-content: center;
-  margin-top: 8px;
+/* Garante que stats-card não force largura além da tela */
+.appointments-report-container .stats-grid {
+  min-width: 0;
 }
 
+/* Tabela do relatório: colunas menos essenciais somem no mobile */
 @media (max-width: 768px) {
-  .filters-grid {
+  .appointments-report-container .col-report-hide {
+    display: none;
+  }
+
+  .appointments-report-container .stats-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .appointments-report-container .stats-grid {
     grid-template-columns: 1fr;
   }
 }

@@ -102,8 +102,8 @@ export default function Professionals() {
             <thead>
               <tr>
                 <th>Nome</th>
-                <th>Telefone</th>
-                <th>Usuário de Acesso</th>
+                <th className="col-hide-mobile">Telefone</th>
+                <th className="col-hide-mobile">Usuário de Acesso</th>
                 <th>Status</th>
                 <th>Ações</th>
               </tr>
@@ -115,8 +115,8 @@ export default function Professionals() {
                 barbeiros.map(b => (
                   <tr key={b.id}>
                     <td style={{fontWeight: 600}}>{b.nome}</td>
-                    <td>{b.telefone || '—'}</td>
-                    <td>{usuarios.find(u => u.id === b.usuario_id)?.nome || <span style={{opacity: 0.5}}>- Sem Acesso -</span>}</td>
+                    <td className="col-hide-mobile">{b.telefone || '—'}</td>
+                    <td className="col-hide-mobile">{usuarios.find(u => u.id === b.usuario_id)?.nome || <span style={{opacity: 0.5}}>- Sem Acesso -</span>}</td>
                     <td>
                       <span className={`badge ${b.ativo ? 'badge-concluido' : 'badge-cancelado'}`}>
                         {b.ativo ? 'Ativo' : 'Inativo'}

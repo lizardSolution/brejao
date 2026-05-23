@@ -1,31 +1,32 @@
 .financial-report-container {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
 }
 
-.filters-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 16px;
-  align-items: flex-end;
+.financial-report-container .page-header {
+  position: relative;
 }
 
-.filter-actions {
-  display: flex;
-  align-items: flex-end;
+/* Garante que stats-card não force largura além da tela */
+.financial-report-container .stats-grid {
+  min-width: 0;
 }
 
-.filter-actions .btn {
-  height: 42px; /* para alinhar com os inputs */
-}
-
+/* Tabela do relatório: colunas menos essenciais somem no mobile */
 @media (max-width: 768px) {
-  .filters-grid {
-    grid-template-columns: 1fr;
+  .financial-report-container .col-report-hide {
+    display: none;
   }
-  
-  .filter-actions {
-    margin-top: 16px;
+
+  .financial-report-container .stats-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .financial-report-container .stats-grid {
+    grid-template-columns: 1fr;
   }
 }

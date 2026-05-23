@@ -64,7 +64,19 @@
 .modal-body {
   padding: var(--spacing-lg);
   overflow-y: auto;
+  overflow-x: hidden;
   flex: 1;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+/* Garante que todo form-row dentro de modal nunca cause overflow */
+.modal .form-row {
+  min-width: 0;
+}
+
+.modal .form-row > * {
+  min-width: 0;
 }
 
 .modal-footer {

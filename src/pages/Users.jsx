@@ -116,7 +116,7 @@ export default function Users() {
             <thead>
               <tr>
                 <th>Nome</th>
-                <th>E-mail</th>
+                <th className="col-hide-mobile">E-mail</th>
                 <th>Perfil</th>
                 <th>Ações</th>
               </tr>
@@ -128,7 +128,7 @@ export default function Users() {
                 usuarios.map(u => (
                   <tr key={u.id}>
                     <td style={{fontWeight: 600}}>{u.nome}</td>
-                    <td>{u.email}</td>
+                    <td className="col-hide-mobile">{u.email}</td>
                     <td><span className={`badge badge-${u.perfil === 'admin' ? 'concluido' : 'confirmado'}`}>{u.perfil.toUpperCase()}</span></td>
                     <td className="actions">
                       {perms.alterar && <button className="btn btn-secondary btn-sm" onClick={() => abrirModalUsuario(u)}>Editar</button>}
