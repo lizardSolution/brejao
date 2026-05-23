@@ -130,10 +130,8 @@ export default function AppointmentsReport() {
              📄 PDF
           </button>
         </div>
-      </div>
-
-      <div className="card print-hide" style={{ marginBottom: '24px' }}>
-        <div className="filters-grid">
+         <div className="card print-hide" style={{ marginBottom: '24px' }}>
+        <div className="form-row">
           <div className="form-group">
             <label className="form-label">Data Inicial</label>
             <input 
@@ -141,7 +139,7 @@ export default function AppointmentsReport() {
               className="form-input"
               value={filtros.dataInicial}
               onChange={e => setFiltros({...filtros, dataInicial: e.target.value})}
-              style={{ colorScheme: 'dark' }}
+              style={{ colorScheme: 'dark', width: '100%' }}
             />
           </div>
           <div className="form-group">
@@ -151,7 +149,7 @@ export default function AppointmentsReport() {
               className="form-input"
               value={filtros.dataFinal}
               onChange={e => setFiltros({...filtros, dataFinal: e.target.value})}
-              style={{ colorScheme: 'dark' }}
+              style={{ colorScheme: 'dark', width: '100%' }}
             />
           </div>
           <div className="form-group">
@@ -160,6 +158,7 @@ export default function AppointmentsReport() {
               className="form-select"
               value={filtros.barbeiro}
               onChange={e => setFiltros({...filtros, barbeiro: e.target.value})}
+              style={{ width: '100%' }}
             >
               <option value="">Todos os Profissionais</option>
               {barbeirosDisponiveis.map(b => (
@@ -173,6 +172,7 @@ export default function AppointmentsReport() {
               className="form-select"
               value={filtros.status}
               onChange={e => setFiltros({...filtros, status: e.target.value})}
+              style={{ width: '100%' }}
             >
               <option value="todos">Todos</option>
               <option value="agendado">Agendado</option>
@@ -180,17 +180,18 @@ export default function AppointmentsReport() {
               <option value="cancelado">Cancelado</option>
             </select>
           </div>
-          <div className="filter-actions" style={{ gridColumn: '1 / -1' }}>
-            <button
-              className="btn btn-primary"
-              onClick={handleGerarRelatorio}
-              disabled={loading}
-              style={{ width: '100%', maxWidth: '300px', margin: '0 auto', display: 'block' }}
-            >
-              Gerar Relatório
-            </button>
-          </div>
         </div>
+        <div className="filter-actions" style={{ display: 'flex', marginTop: '16px' }}>
+          <button 
+            className="btn btn-primary" 
+            onClick={handleGerarRelatorio}
+            disabled={loading}
+            style={{ flex: 1 }}
+          >
+            Gerar Relatório
+          </button>
+        </div>
+      </div>
       </div>
 
       <div className="stats-grid" style={{ marginBottom: '24px' }}>

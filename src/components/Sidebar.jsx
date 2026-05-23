@@ -13,8 +13,10 @@ export default function Sidebar() {
     { to: '/relatorio-agendamentos', icon: '—', label: 'Rel. Agendamentos' },
     { to: '/financeiro', icon: '—', label: 'Financeiro' },
     { to: '/relatorio-financeiro', icon: '—', label: 'Rel. Financeiro' },
-    { to: '/produtos', icon: '—', label: 'Produtos' },
-    { to: '/cadastros', icon: '—', label: 'Cadastros' },
+    { to: '/produtos', icon: '—', label: 'Produtos e Estoque' },
+    { to: '/clientes', icon: '—', label: 'Clientes' },
+    { to: '/profissionais', icon: '—', label: 'Profissionais' },
+    { to: '/usuarios', icon: '—', label: 'Usuários do Sistema' },
   ];
 
   const getInitials = (nome) => {

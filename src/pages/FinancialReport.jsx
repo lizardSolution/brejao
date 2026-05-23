@@ -159,7 +159,7 @@ export default function FinancialReport() {
       </div>
 
       <div className="card print-hide" style={{ marginBottom: '24px' }}>
-        <div className="filters-grid">
+        <div className="form-row">
           <div className="form-group">
             <label className="form-label">Data Inicial</label>
             <input 
@@ -167,7 +167,7 @@ export default function FinancialReport() {
               className="form-input"
               value={filtros.dataInicial}
               onChange={e => setFiltros({...filtros, dataInicial: e.target.value})}
-              style={{ colorScheme: 'dark' }}
+              style={{ colorScheme: 'dark', width: '100%' }}
             />
           </div>
           <div className="form-group">
@@ -177,7 +177,7 @@ export default function FinancialReport() {
               className="form-input"
               value={filtros.dataFinal}
               onChange={e => setFiltros({...filtros, dataFinal: e.target.value})}
-              style={{ colorScheme: 'dark' }}
+              style={{ colorScheme: 'dark', width: '100%' }}
             />
           </div>
           <div className="form-group">
@@ -186,22 +186,23 @@ export default function FinancialReport() {
               className="form-select"
               value={filtros.tipo}
               onChange={e => setFiltros({...filtros, tipo: e.target.value})}
+              style={{ width: '100%' }}
             >
               <option value="ambos">Ambas (Pagar e Receber)</option>
               <option value="pagar">Somente Contas a Pagar</option>
               <option value="receber">Somente Contas a Receber</option>
             </select>
           </div>
-          <div className="filter-actions">
-            <button 
-              className="btn btn-primary btn-block" 
-              onClick={handleGerarRelatorio}
-              disabled={loading}
-              style={{ marginTop: '22px' }}
-            >
-              Gerar Relatório
-            </button>
-          </div>
+        </div>
+        <div className="filter-actions" style={{ display: 'flex', marginTop: '16px' }}>
+          <button 
+            className="btn btn-primary" 
+            onClick={handleGerarRelatorio}
+            disabled={loading}
+            style={{ flex: 1 }}
+          >
+            Gerar Relatório
+          </button>
         </div>
       </div>
 

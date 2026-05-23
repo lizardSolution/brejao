@@ -7,7 +7,9 @@ import AppointmentsReport from './pages/AppointmentsReport';
 import Financial from './pages/Financial';
 import FinancialReport from './pages/FinancialReport';
 import Products from './pages/Products';
-import Registers from './pages/Registers';
+import Clients from './pages/Clients';
+import Professionals from './pages/Professionals';
+import Users from './pages/Users';
 
 // Rota protegida
 function RotaProtegida({ children }) {
@@ -79,10 +81,26 @@ function App() {
             }
           />
           <Route
-            path="/cadastros"
+            path="/clientes"
             element={
               <RotaProtegida>
-                <Registers />
+                <Clients />
+              </RotaProtegida>
+            }
+          />
+          <Route
+            path="/profissionais"
+            element={
+              <RotaProtegida>
+                <Professionals />
+              </RotaProtegida>
+            }
+          />
+          <Route
+            path="/usuarios"
+            element={
+              <RotaProtegida>
+                <Users />
               </RotaProtegida>
             }
           />
