@@ -89,7 +89,7 @@ export default function Professionals() {
       </div>
 
       <div className="card animate-fadeIn">
-        <div className="registers-header" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px' }}>
+        <div className="registers-header" style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
           <h2 style={{ fontSize: '1.2rem' }}>Equipe de Profissionais</h2>
           {perms.incluir && (
             <button className="btn btn-primary" onClick={() => abrirModalBarbeiro()}>

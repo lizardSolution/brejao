@@ -130,7 +130,9 @@ export default function AppointmentsReport() {
              📄 PDF
           </button>
         </div>
-         <div className="card print-hide" style={{ marginBottom: '24px' }}>
+      </div>
+
+      <div className="card print-hide" style={{ marginBottom: '24px' }}>
         <div className="form-row">
           <div className="form-group">
             <label className="form-label">Data Inicial</label>
@@ -191,7 +193,6 @@ export default function AppointmentsReport() {
             Gerar Relatório
           </button>
         </div>
-      </div>
       </div>
 
       <div className="stats-grid" style={{ marginBottom: '24px' }}>
