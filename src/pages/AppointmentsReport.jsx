@@ -180,8 +180,8 @@ export default function AppointmentsReport() {
       </div>
 
       <div className="card table-card">
-        <div className="table-responsive">
-          <table className="modern-table">
+        <div className="table-container">
+          <table className="table">
             <thead>
               <tr>
                 <th>Data</th>
