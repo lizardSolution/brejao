@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { api } from '../services/api';
 import './AppointmentsReport.css';
 
 export default function AppointmentsReport() {
@@ -21,17 +22,13 @@ export default function AppointmentsReport() {
   const carregarDados = async () => {
     setLoading(true);
     try {
-      const res = await fetch('http://localhost:3000/api/agendamentos');
+      const dados = await api.get('agendamentos');
 
-      if (res.ok) {
-        const dados = await res.json();
+      // Extrair lista de barbeiros únicos para o filtro
+      const barbeiros = [...new Set(dados.map(a => a.barbeiro).filter(Boolean))].sort();
+      setBarbeirosDisponiveis(barbeiros);
 
-        // Extrair lista de barbeiros únicos para o filtro
-        const barbeiros = [...new Set(dados.map(a => a.barbeiro).filter(Boolean))].sort();
-        setBarbeirosDisponiveis(barbeiros);
-
-        setAgendamentos(dados);
-      }
+      setAgendamentos(dados);
     } catch (error) {
       console.error('Erro ao buscar agendamentos:', error);
     } finally {
@@ -76,6 +73,41 @@ export default function AppointmentsReport() {
     return `${day}/${month}/${year}`;
   };
 
+  const exportarExcel = () => {
+    if (dadosFiltrados.length === 0) {
+      alert('Nenhum dado para exportar');
+      return;
+    }
+    
+    const headers = ['Data', 'Horario', 'Cliente', 'Servico', 'Profissional', 'Status', 'Valor'];
+    
+    const rows = dadosFiltrados.map(item => [
+      formatarData(item.data),
+      item.hora.substring(0,5),
+      `"${item.cliente_nome}"`,
+      `"${item.servico}"`,
+      `"${item.barbeiro}"`,
+      item.status,
+      item.valor_servico
+    ]);
+
+    let csvContent = "data:text/csv;charset=utf-8,\uFEFF" 
+      + headers.join(";") + "\n" 
+      + rows.map(e => e.join(";")).join("\n");
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "relatorio_agendamentos.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const exportarPDF = () => {
+    window.print();
+  };
+
   // Calcular Totais (considerando todos filtrados, ou apenas os concluídos, se preferir. Vamos considerar o valor total dos agendamentos exibidos)
   const totalAgendamentos = dadosFiltrados.length;
   const totalConcluidos = dadosFiltrados.filter(a => a.status === 'concluido').length;
@@ -84,11 +116,21 @@ export default function AppointmentsReport() {
   return (
     <div className="appointments-report-container page-container">
       <div className="page-header">
-        <h1 className="page-title">Relatório de Agendamentos</h1>
-        <p className="page-subtitle">Acompanhe os serviços executados por dia e horário</p>
+        <div>
+          <h1 className="page-title">Relatório de Agendamentos</h1>
+          <p className="page-subtitle print-hide">Acompanhe os serviços executados por dia e horário</p>
+        </div>
+        <div className="page-actions print-hide" style={{ display: 'flex', gap: '8px' }}>
+          <button className="btn btn-secondary" onClick={exportarExcel} disabled={dadosFiltrados.length === 0}>
+             📊 Excel
+          </button>
+          <button className="btn btn-secondary" onClick={exportarPDF} disabled={dadosFiltrados.length === 0}>
+             📄 PDF
+          </button>
+        </div>
       </div>
 
-      <div className="card report-filters-card">
+      <div className="card print-hide" style={{ marginBottom: '24px' }}>
         <div className="filters-grid">
           <div className="form-group">
             <label>Data Inicial</label>
@@ -147,35 +189,23 @@ export default function AppointmentsReport() {
         </div>
       </div>
 
-      <div className="dashboard-cards" style={{ marginBottom: '24px' }}>
-        <div className="stat-card">
-          <div className="stat-icon" style={{ backgroundColor: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6' }}>
-            📅
-          </div>
-          <div className="stat-info">
-            <span className="stat-label">Total de Agendamentos</span>
-            <span className="stat-value">{totalAgendamentos}</span>
-          </div>
+      <div className="stats-grid" style={{ marginBottom: '24px' }}>
+        <div className="stats-card">
+          <div className="stats-card-icon" style={{ color: 'var(--color-info)' }}>📅</div>
+          <div className="stats-card-label">Total de Agendamentos</div>
+          <div className="stats-card-value">{totalAgendamentos}</div>
         </div>
 
-        <div className="stat-card">
-          <div className="stat-icon" style={{ backgroundColor: 'rgba(34, 197, 94, 0.1)', color: '#22c55e' }}>
-            ✓
-          </div>
-          <div className="stat-info">
-            <span className="stat-label">Serviços Concluídos</span>
-            <span className="stat-value">{totalConcluidos}</span>
-          </div>
+        <div className="stats-card">
+          <div className="stats-card-icon" style={{ color: 'var(--color-success)' }}>✓</div>
+          <div className="stats-card-label">Serviços Concluídos</div>
+          <div className="stats-card-value positive">{totalConcluidos}</div>
         </div>
 
-        <div className="stat-card">
-          <div className="stat-icon" style={{ backgroundColor: 'rgba(139, 92, 246, 0.1)', color: '#8b5cf6' }}>
-            $
-          </div>
-          <div className="stat-info">
-            <span className="stat-label">Valor Previsto/Realizado</span>
-            <span className="stat-value">{formatarMoeda(valorTotal)}</span>
-          </div>
+        <div className="stats-card">
+          <div className="stats-card-icon" style={{ color: 'var(--color-gold)' }}>$</div>
+          <div className="stats-card-label">Valor Previsto/Realizado</div>
+          <div className="stats-card-value gold">{formatarMoeda(valorTotal)}</div>
         </div>
       </div>
 

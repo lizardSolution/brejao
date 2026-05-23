@@ -658,3 +658,77 @@ input, select, textarea {
     align-items: flex-start;
   }
 }
+
+/* ====================== PRINT STYLES ====================== */
+@media print {
+  .sidebar,
+  .sidebar-toggle,
+  .sidebar-overlay,
+  .print-hide {
+    display: none !important;
+  }
+  
+  .page-content {
+    margin-left: 0 !important;
+    padding: 0 !important;
+  }
+  
+  body {
+    background: white !important;
+    color: black !important;
+    min-height: auto;
+  }
+  
+  .page-title {
+    color: black !important;
+  }
+  
+  .card, .stats-card, .table th, .table td {
+    background: transparent !important;
+    border-color: #ddd !important;
+    color: black !important;
+    box-shadow: none !important;
+  }
+  
+  .table th {
+    background: #f5f5f5 !important;
+  }
+
+  .stats-card-value {
+    color: black !important;
+  }
+
+  /* Garantir que as badges tenham contraste ao imprimir */
+  .badge, .status-badge {
+    border: 1px solid #ccc !important;
+    color: black !important;
+    background: transparent !important;
+  }
+  
+  .stats-card {
+    border: 1px solid #ccc !important;
+    page-break-inside: avoid;
+  }
+
+  .stats-grid {
+    display: flex !important;
+    flex-wrap: wrap !important;
+  }
+
+  .stats-card {
+    flex: 1 1 30% !important;
+  }
+
+  .table-container {
+    overflow: visible !important;
+  }
+
+  table {
+    page-break-inside: auto;
+  }
+  
+  tr {
+    page-break-inside: avoid;
+    page-break-after: auto;
+  }
+}

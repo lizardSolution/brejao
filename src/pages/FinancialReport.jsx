@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { api } from '../services/api';
 import './FinancialReport.css';
 
 export default function FinancialReport() {
@@ -20,37 +21,32 @@ export default function FinancialReport() {
   const carregarDados = async () => {
     setLoading(true);
     try {
-      const [resPagar, resReceber] = await Promise.all([
-        fetch('http://localhost:3000/api/contas_pagar'),
-        fetch('http://localhost:3000/api/contas_receber')
+      const [pagar, receber] = await Promise.all([
+        api.get('contas_pagar'),
+        api.get('contas_receber')
       ]);
 
-      if (resPagar.ok && resReceber.ok) {
-        const pagar = await resPagar.json();
-        const receber = await resReceber.json();
-        
-        // Formatar para um array único
-        const pagarFormatado = pagar.map(item => ({
-          ...item,
-          tipo: 'Pagar',
-          dataReferencia: item.data_vencimento,
-          dataEfetivacao: item.data_pagamento,
-          categoriaOrigem: item.categoria,
-          valorExibicao: -Math.abs(item.valor) // negativo para display total
-        }));
+      // Formatar para um array único
+      const pagarFormatado = pagar.map(item => ({
+        ...item,
+        tipo: 'Pagar',
+        dataReferencia: item.data_vencimento,
+        dataEfetivacao: item.data_pagamento,
+        categoriaOrigem: item.categoria,
+        valorExibicao: -Math.abs(item.valor) // negativo para display total
+      }));
 
-        const receberFormatado = receber.map(item => ({
-          ...item,
-          tipo: 'Receber',
-          dataReferencia: item.data_vencimento,
-          dataEfetivacao: item.data_recebimento,
-          categoriaOrigem: item.origem,
-          valorExibicao: Math.abs(item.valor)
-        }));
+      const receberFormatado = receber.map(item => ({
+        ...item,
+        tipo: 'Receber',
+        dataReferencia: item.data_vencimento,
+        dataEfetivacao: item.data_recebimento,
+        categoriaOrigem: item.origem,
+        valorExibicao: Math.abs(item.valor)
+      }));
 
-        setContasPagar(pagarFormatado);
-        setContasReceber(receberFormatado);
-      }
+      setContasPagar(pagarFormatado);
+      setContasReceber(receberFormatado);
     } catch (error) {
       console.error('Erro ao buscar dados financeiros:', error);
     } finally {
@@ -103,6 +99,41 @@ export default function FinancialReport() {
     return date.toLocaleDateString('pt-BR');
   };
 
+  const exportarExcel = () => {
+    if (dadosFiltrados.length === 0) {
+      alert('Nenhum dado para exportar');
+      return;
+    }
+    
+    const headers = ['Tipo', 'Descricao', 'Categoria/Origem', 'Vencimento', 'Efetivacao', 'Status', 'Valor'];
+    
+    const rows = dadosFiltrados.map(item => [
+      item.tipo,
+      `"${item.descricao}"`,
+      `"${item.categoriaOrigem || '-'}"`,
+      formatarData(item.dataReferencia),
+      formatarData(item.dataEfetivacao),
+      item.status,
+      item.valor
+    ]);
+
+    let csvContent = "data:text/csv;charset=utf-8,\uFEFF" 
+      + headers.join(";") + "\n" 
+      + rows.map(e => e.join(";")).join("\n");
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "relatorio_financeiro.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const exportarPDF = () => {
+    window.print();
+  };
+
   // Calcular Totais
   const totalPagar = Math.abs(dadosFiltrados.filter(i => i.tipo === 'Pagar').reduce((acc, curr) => acc + Number(curr.valor), 0));
   const totalReceber = dadosFiltrados.filter(i => i.tipo === 'Receber').reduce((acc, curr) => acc + Number(curr.valor), 0);
@@ -111,11 +142,21 @@ export default function FinancialReport() {
   return (
     <div className="financial-report-container page-container">
       <div className="page-header">
-        <h1 className="page-title">Relatório Financeiro</h1>
-        <p className="page-subtitle">Consulte movimentações de contas a pagar e receber</p>
+        <div>
+          <h1 className="page-title">Relatório Financeiro</h1>
+          <p className="page-subtitle print-hide">Consulte movimentações de contas a pagar e receber</p>
+        </div>
+        <div className="page-actions print-hide" style={{ display: 'flex', gap: '8px' }}>
+          <button className="btn btn-secondary" onClick={exportarExcel} disabled={dadosFiltrados.length === 0}>
+             📊 Excel
+          </button>
+          <button className="btn btn-secondary" onClick={exportarPDF} disabled={dadosFiltrados.length === 0}>
+             📄 PDF
+          </button>
+        </div>
       </div>
 
-      <div className="card report-filters-card">
+      <div className="card print-hide" style={{ marginBottom: '24px' }}>
         <div className="filters-grid">
           <div className="form-group">
             <label>Data Inicial</label>
@@ -160,36 +201,24 @@ export default function FinancialReport() {
         </div>
       </div>
 
-      <div className="dashboard-cards" style={{ marginBottom: '24px' }}>
-        <div className="stat-card">
-          <div className="stat-icon" style={{ backgroundColor: 'rgba(34, 197, 94, 0.1)', color: '#22c55e' }}>
-             ↓
-          </div>
-          <div className="stat-info">
-            <span className="stat-label">Total a Receber</span>
-            <span className="stat-value">{formatarMoeda(totalReceber)}</span>
-          </div>
+      <div className="stats-grid" style={{ marginBottom: '24px' }}>
+        <div className="stats-card">
+          <div className="stats-card-icon" style={{ color: 'var(--color-success)' }}>↓</div>
+          <div className="stats-card-label">Total a Receber</div>
+          <div className="stats-card-value positive">{formatarMoeda(totalReceber)}</div>
         </div>
 
-        <div className="stat-card">
-          <div className="stat-icon" style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)', color: '#ef4444' }}>
-             ↑
-          </div>
-          <div className="stat-info">
-            <span className="stat-label">Total a Pagar</span>
-            <span className="stat-value">{formatarMoeda(totalPagar)}</span>
-          </div>
+        <div className="stats-card">
+          <div className="stats-card-icon" style={{ color: 'var(--color-error)' }}>↑</div>
+          <div className="stats-card-label">Total a Pagar</div>
+          <div className="stats-card-value negative">{formatarMoeda(totalPagar)}</div>
         </div>
 
-        <div className="stat-card">
-          <div className="stat-icon" style={{ backgroundColor: saldo >= 0 ? 'rgba(59, 130, 246, 0.1)' : 'rgba(239, 68, 68, 0.1)', color: saldo >= 0 ? '#3b82f6' : '#ef4444' }}>
-             =
-          </div>
-          <div className="stat-info">
-            <span className="stat-label">Saldo Previsto</span>
-            <span className="stat-value" style={{ color: saldo >= 0 ? 'var(--color-text)' : '#ef4444' }}>
-              {formatarMoeda(saldo)}
-            </span>
+        <div className="stats-card">
+          <div className="stats-card-icon" style={{ color: saldo >= 0 ? 'var(--color-info)' : 'var(--color-error)' }}>=</div>
+          <div className="stats-card-label">Saldo Previsto</div>
+          <div className={`stats-card-value ${saldo >= 0 ? '' : 'negative'}`}>
+            {formatarMoeda(saldo)}
           </div>
         </div>
       </div>
