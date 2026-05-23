@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react';
 import { api } from '../services/api';
+import { dataHoje } from '../utils/helpers';
 import './AppointmentsReport.css';
 
 export default function AppointmentsReport() {
   const [agendamentos, setAgendamentos] = useState([]);
   const [loading, setLoading] = useState(false);
   const [filtros, setFiltros] = useState({
-    dataInicial: new Date().toISOString().split('T')[0],
-    dataFinal: new Date().toISOString().split('T')[0],
+    dataInicial: dataHoje(),
+    dataFinal: dataHoje(),
     barbeiro: '',
     status: 'todos' // 'todos', 'agendado', 'concluido', 'cancelado'
   });
@@ -115,11 +116,12 @@ export default function AppointmentsReport() {
 
   return (
     <div className="appointments-report-container page-container">
-      <div className="page-header">
+      <div className="page-header" style={{ position: 'relative' }}>
         <div>
-          <h1 className="page-title">Relatório de Agendamentos</h1>
+          <h1 className="page-title" style={{ borderBottom: 'none', paddingBottom: 0 }}>Relatório de Agendamentos</h1>
           <p className="page-subtitle print-hide">Acompanhe os serviços executados por dia e horário</p>
         </div>
+        <img src="/img/logo.png" alt="Lizard Solutions" className="print-only" style={{ display: 'none' }} />
         <div className="page-actions print-hide" style={{ display: 'flex', gap: '8px' }}>
           <button className="btn btn-secondary" onClick={exportarExcel} disabled={dadosFiltrados.length === 0}>
              📊 Excel
@@ -133,29 +135,31 @@ export default function AppointmentsReport() {
       <div className="card print-hide" style={{ marginBottom: '24px' }}>
         <div className="filters-grid">
           <div className="form-group">
-            <label>Data Inicial</label>
-            <input
-              type="date"
-              className="form-control"
+            <label className="form-label">Data Inicial</label>
+            <input 
+              type="date" 
+              className="form-input"
               value={filtros.dataInicial}
-              onChange={e => setFiltros({ ...filtros, dataInicial: e.target.value })}
+              onChange={e => setFiltros({...filtros, dataInicial: e.target.value})}
+              style={{ colorScheme: 'dark' }}
             />
           </div>
           <div className="form-group">
-            <label>Data Final</label>
-            <input
-              type="date"
-              className="form-control"
+            <label className="form-label">Data Final</label>
+            <input 
+              type="date" 
+              className="form-input"
               value={filtros.dataFinal}
-              onChange={e => setFiltros({ ...filtros, dataFinal: e.target.value })}
+              onChange={e => setFiltros({...filtros, dataFinal: e.target.value})}
+              style={{ colorScheme: 'dark' }}
             />
           </div>
           <div className="form-group">
-            <label>Profissional</label>
-            <select
-              className="form-control"
+            <label className="form-label">Profissional</label>
+            <select 
+              className="form-select"
               value={filtros.barbeiro}
-              onChange={e => setFiltros({ ...filtros, barbeiro: e.target.value })}
+              onChange={e => setFiltros({...filtros, barbeiro: e.target.value})}
             >
               <option value="">Todos os Profissionais</option>
               {barbeirosDisponiveis.map(b => (
@@ -164,11 +168,11 @@ export default function AppointmentsReport() {
             </select>
           </div>
           <div className="form-group">
-            <label>Status</label>
-            <select
-              className="form-control"
+            <label className="form-label">Status</label>
+            <select 
+              className="form-select"
               value={filtros.status}
-              onChange={e => setFiltros({ ...filtros, status: e.target.value })}
+              onChange={e => setFiltros({...filtros, status: e.target.value})}
             >
               <option value="todos">Todos</option>
               <option value="agendado">Agendado</option>

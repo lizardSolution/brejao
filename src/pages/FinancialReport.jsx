@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { api } from '../services/api';
+import { dataHoje } from '../utils/helpers';
 import './FinancialReport.css';
 
 export default function FinancialReport() {
@@ -7,8 +8,8 @@ export default function FinancialReport() {
   const [contasReceber, setContasReceber] = useState([]);
   const [loading, setLoading] = useState(false);
   const [filtros, setFiltros] = useState({
-    dataInicial: '',
-    dataFinal: '',
+    dataInicial: dataHoje(),
+    dataFinal: dataHoje(),
     tipo: 'ambos' // 'pagar', 'receber', 'ambos'
   });
   
@@ -141,11 +142,12 @@ export default function FinancialReport() {
 
   return (
     <div className="financial-report-container page-container">
-      <div className="page-header">
+      <div className="page-header" style={{ position: 'relative' }}>
         <div>
-          <h1 className="page-title">Relatório Financeiro</h1>
+          <h1 className="page-title" style={{ borderBottom: 'none', paddingBottom: 0 }}>Relatório Financeiro</h1>
           <p className="page-subtitle print-hide">Consulte movimentações de contas a pagar e receber</p>
         </div>
+        <img src="/img/logo.png" alt="Lizard Solutions" className="print-only" style={{ display: 'none' }} />
         <div className="page-actions print-hide" style={{ display: 'flex', gap: '8px' }}>
           <button className="btn btn-secondary" onClick={exportarExcel} disabled={dadosFiltrados.length === 0}>
              📊 Excel
@@ -159,27 +161,29 @@ export default function FinancialReport() {
       <div className="card print-hide" style={{ marginBottom: '24px' }}>
         <div className="filters-grid">
           <div className="form-group">
-            <label>Data Inicial</label>
+            <label className="form-label">Data Inicial</label>
             <input 
               type="date" 
-              className="form-control"
+              className="form-input"
               value={filtros.dataInicial}
               onChange={e => setFiltros({...filtros, dataInicial: e.target.value})}
+              style={{ colorScheme: 'dark' }}
             />
           </div>
           <div className="form-group">
-            <label>Data Final</label>
+            <label className="form-label">Data Final</label>
             <input 
               type="date" 
-              className="form-control"
+              className="form-input"
               value={filtros.dataFinal}
               onChange={e => setFiltros({...filtros, dataFinal: e.target.value})}
+              style={{ colorScheme: 'dark' }}
             />
           </div>
           <div className="form-group">
-            <label>Tipo de Conta</label>
+            <label className="form-label">Tipo de Conta</label>
             <select 
-              className="form-control"
+              className="form-select"
               value={filtros.tipo}
               onChange={e => setFiltros({...filtros, tipo: e.target.value})}
             >

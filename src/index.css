@@ -681,17 +681,32 @@ input, select, textarea {
   
   .page-title {
     color: black !important;
+    font-size: 24pt !important;
+    margin-bottom: 20px;
   }
   
-  .card, .stats-card, .table th, .table td {
+  .print-only {
+    display: block !important;
+    position: absolute;
+    top: 0;
+    right: 0;
+    height: 60px;
+    object-fit: contain;
+  }
+  
+  .card, .stats-card, .table th, .table td, .table-container {
     background: transparent !important;
-    border-color: #ddd !important;
+    border-color: #555 !important;
     color: black !important;
     box-shadow: none !important;
+    border-radius: 0 !important;
   }
   
   .table th {
-    background: #f5f5f5 !important;
+    background: #e2e2e2 !important;
+    color: black !important;
+    font-weight: bold !important;
+    border-bottom: 2px solid #333 !important;
   }
 
   .stats-card-value {
@@ -706,8 +721,9 @@ input, select, textarea {
   }
   
   .stats-card {
-    border: 1px solid #ccc !important;
+    border: 1px solid #333 !important;
     page-break-inside: avoid;
+    border-radius: 0 !important;
   }
 
   .stats-grid {
@@ -725,6 +741,12 @@ input, select, textarea {
 
   table {
     page-break-inside: auto;
+    border-collapse: collapse !important;
+    width: 100% !important;
+  }
+  
+  .table td {
+    border-bottom: 1px solid #ddd !important;
   }
   
   tr {
