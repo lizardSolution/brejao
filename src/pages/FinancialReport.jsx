@@ -149,11 +149,11 @@ export default function FinancialReport() {
         </div>
         <img src="/img/logo.png" alt="Lizard Solutions" className="print-only" style={{ display: 'none' }} />
         <div className="page-actions print-hide" style={{ display: 'flex', gap: '8px' }}>
-          <button className="btn btn-secondary" onClick={exportarExcel} disabled={dadosFiltrados.length === 0}>
-             📊 Excel
+          <button className="btn btn-secondary" onClick={exportarExcel} disabled={dadosFiltrados.length === 0} title="Exportar Excel">
+             📊
           </button>
-          <button className="btn btn-secondary" onClick={exportarPDF} disabled={dadosFiltrados.length === 0}>
-             📄 PDF
+          <button className="btn btn-secondary" onClick={exportarPDF} disabled={dadosFiltrados.length === 0} title="Exportar PDF">
+             📄
           </button>
         </div>
       </div>

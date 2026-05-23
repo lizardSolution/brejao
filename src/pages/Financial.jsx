@@ -409,8 +409,9 @@ export default function Financial() {
                         <button
                           className="btn btn-danger btn-sm"
                           onClick={() => excluirPagar(c.id)}
+                          title="Excluir"
                         >
-                          Excluir
+                          🗑️
                         </button>
                       </td>
                     </tr>
@@ -514,8 +515,9 @@ export default function Financial() {
                         <button
                           className="btn btn-danger btn-sm"
                           onClick={() => excluirReceber(c.id)}
+                          title="Excluir"
                         >
-                          Excluir
+                          🗑️
                         </button>
                       </td>
                     </tr>

@@ -131,8 +131,8 @@ export default function Users() {
                     <td className="col-hide-mobile">{u.email}</td>
                     <td><span className={`badge badge-${u.perfil === 'admin' ? 'concluido' : 'confirmado'}`}>{u.perfil.toUpperCase()}</span></td>
                     <td className="actions">
-                      {perms.alterar && <button className="btn btn-secondary btn-sm" onClick={() => abrirModalUsuario(u)}>Editar</button>}
-                      {perms.excluir && <button className="btn btn-danger btn-sm" onClick={() => excluirUsuario(u.id)}>Excluir</button>}
+                      {perms.alterar && <button className="btn btn-secondary btn-sm" onClick={() => abrirModalUsuario(u)} title="Editar">✏️</button>}
+                      {perms.excluir && <button className="btn btn-danger btn-sm" onClick={() => excluirUsuario(u.id)} title="Excluir">🗑️</button>}
                     </td>
                   </tr>
                 ))

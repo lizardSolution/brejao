@@ -628,7 +628,7 @@ export default function Appointments() {
                         onClick={() => abrirEditarAgendamento(a)}
                         title="Editar/Adicionar Produtos"
                       >
-                        Editar
+                        ✏️
                       </button>
                     )}
                     {perms.excluir && (
@@ -637,7 +637,7 @@ export default function Appointments() {
                         onClick={() => excluirAgendamento(a.id)}
                         title="Excluir"
                       >
-                        Excluir
+                        🗑️
                       </button>
                     )}
                   </div>

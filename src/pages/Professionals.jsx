@@ -123,8 +123,8 @@ export default function Professionals() {
                       </span>
                     </td>
                     <td className="actions">
-                      {perms.alterar && <button className="btn btn-secondary btn-sm" onClick={() => abrirModalBarbeiro(b)}>Editar</button>}
-                      {perms.excluir && <button className="btn btn-danger btn-sm" onClick={() => excluirBarbeiro(b.id)}>Excluir</button>}
+                      {perms.alterar && <button className="btn btn-secondary btn-sm" onClick={() => abrirModalBarbeiro(b)} title="Editar">✏️</button>}
+                      {perms.excluir && <button className="btn btn-danger btn-sm" onClick={() => excluirBarbeiro(b.id)} title="Excluir">🗑️</button>}
                     </td>
                   </tr>
                 ))

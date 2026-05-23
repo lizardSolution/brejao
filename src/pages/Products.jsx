@@ -299,14 +299,16 @@ export default function Products() {
                   <button
                     className="btn btn-secondary btn-sm"
                     onClick={() => abrirEditarProduto(p)}
+                    title="Editar"
                   >
-                    Editar
+                    ✏️
                   </button>
                   <button
                     className="btn btn-danger btn-sm"
                     onClick={() => excluirProduto(p.id)}
+                    title="Excluir"
                   >
-                    Excluir
+                    🗑️
                   </button>
                 </div>
               </div>

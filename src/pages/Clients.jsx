@@ -107,8 +107,8 @@ export default function Clients() {
                     <td>{c.telefone || '—'}</td>
                     <td className="col-hide-mobile">{c.observacoes || '—'}</td>
                     <td className="actions">
-                      {perms.alterar && <button className="btn btn-secondary btn-sm" onClick={() => abrirModalCliente(c)}>Editar</button>}
-                      {perms.excluir && <button className="btn btn-danger btn-sm" onClick={() => excluirCliente(c.id)}>Excluir</button>}
+                      {perms.alterar && <button className="btn btn-secondary btn-sm" onClick={() => abrirModalCliente(c)} title="Editar">✏️</button>}
+                      {perms.excluir && <button className="btn btn-danger btn-sm" onClick={() => excluirCliente(c.id)} title="Excluir">🗑️</button>}
                     </td>
                   </tr>
                 ))
