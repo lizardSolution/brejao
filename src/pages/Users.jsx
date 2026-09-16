@@ -22,7 +22,7 @@ export default function Users() {
   const [confirmDelete, setConfirmDelete] = useState({ isOpen: false, id: null });
   const [alertMessage, setAlertMessage] = useState(null);
   
-  const [formUsuario, setFormUsuario] = useState({ nome: '', email: '', senha: '', perfil: 'comum', permissoes: MODULOS_DEFAULT });
+  const [formUsuario, setFormUsuario] = useState({ nome: '', email: '', senha: '', perfil: 'barbeiro', permissoes: MODULOS_DEFAULT });
 
   useEffect(() => {
     carregarDados();
@@ -44,12 +44,12 @@ export default function Users() {
         nome: usuario.nome, 
         email: usuario.email, 
         senha: '', 
-        perfil: usuario.perfil || 'comum',
+        perfil: usuario.perfil || 'barbeiro',
         permissoes: usuario.permissoes ? { ...MODULOS_DEFAULT, ...usuario.permissoes } : MODULOS_DEFAULT
       });
     } else {
       setEditandoId(null);
-      setFormUsuario({ nome: '', email: '', senha: '', perfil: 'comum', permissoes: MODULOS_DEFAULT });
+      setFormUsuario({ nome: '', email: '', senha: '', perfil: 'barbeiro', permissoes: MODULOS_DEFAULT });
     }
     setModalUsuario(true);
   }
@@ -170,7 +170,8 @@ export default function Users() {
               <select className="form-select" value={formUsuario.perfil} onChange={e => setFormUsuario({...formUsuario, perfil: e.target.value})}>
                 <option value="admin">Administrador (Poder Total)</option>
                 <option value="barbeiro">Barbeiro (Limitado por Padrão)</option>
-                <option value="comum">Usuário Comum</option>
+                {/* ponytail: só aparece para usuário legado já salvo como comum, evita promovê-lo sem querer ao editar */}
+                {formUsuario.perfil === 'comum' && <option value="comum">Usuário Comum (legado)</option>}
               </select>
             </div>
           </div>
