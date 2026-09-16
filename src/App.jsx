@@ -7,6 +7,7 @@ import AppointmentsReport from './pages/AppointmentsReport';
 import Financial from './pages/Financial';
 import FinancialReport from './pages/FinancialReport';
 import Products from './pages/Products';
+import Services from './pages/Services';
 import Clients from './pages/Clients';
 import Professionals from './pages/Professionals';
 import Users from './pages/Users';
@@ -77,6 +78,14 @@ function App() {
             element={
               <RotaProtegida>
                 <Products />
+              </RotaProtegida>
+            }
+          />
+          <Route
+            path="/servicos"
+            element={
+              <RotaProtegida>
+                <Services />
               </RotaProtegida>
             }
           />

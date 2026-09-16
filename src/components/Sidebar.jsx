@@ -14,6 +14,7 @@ export default function Sidebar() {
     { to: '/financeiro', icon: '—', label: 'Financeiro' },
     { to: '/relatorio-financeiro', icon: '—', label: 'Rel. Financeiro' },
     { to: '/produtos', icon: '—', label: 'Produtos e Estoque' },
+    { to: '/servicos', icon: '—', label: 'Serviços' },
     { to: '/clientes', icon: '—', label: 'Clientes' },
     { to: '/profissionais', icon: '—', label: 'Profissionais' },
     { to: '/usuarios', icon: '—', label: 'Usuários do Sistema' },

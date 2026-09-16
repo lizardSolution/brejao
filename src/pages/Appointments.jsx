@@ -21,8 +21,8 @@ export default function Appointments() {
   const [filtroBarbeiro, setFiltroBarbeiro] = useState('todos');
 
   const [editandoId, setEditandoId] = useState(null);
-  const [produtoAvulso, setProdutoAvulso] = useState({ id: '', quantidade: 1 });
-  const [servicoAvulso, setServicoAvulso] = useState('');
+  const [produtoAvulso, setProdutoAvulso] = useState({ id: '', quantidade: 1, preco: '' });
+  const [servicoAvulso, setServicoAvulso] = useState({ id: '', preco: '' });
   const [confirmDelete, setConfirmDelete] = useState({ isOpen: false, tipo: null, id: null, index: null });
   const [alertMessage, setAlertMessage] = useState(null);
 
@@ -179,8 +179,8 @@ export default function Appointments() {
 
   function abrirNovoAgendamento() {
     setEditandoId(null);
-    setProdutoAvulso({ id: '', quantidade: 1 });
-    setServicoAvulso('');
+    setProdutoAvulso({ id: '', quantidade: 1, preco: '' });
+    setServicoAvulso({ id: '', preco: '' });
     setFormData({
       clienteId: '',
       cliente: '',
@@ -197,8 +197,8 @@ export default function Appointments() {
 
   function abrirEditarAgendamento(agendamento) {
     setEditandoId(agendamento.id);
-    setProdutoAvulso({ id: '', quantidade: 1 });
-    setServicoAvulso('');
+    setProdutoAvulso({ id: '', quantidade: 1, preco: '' });
+    setServicoAvulso({ id: '', preco: '' });
     const bdDate = agendamento.data.includes('T') ? agendamento.data.split('T')[0] : agendamento.data;
     setFormData({
       clienteId: agendamento.cliente_id || '',
@@ -228,21 +228,27 @@ export default function Appointments() {
 
   // ===== SERVIÇOS =====
   function adicionarServicoAoAgendamento() {
-    if (!servicoAvulso) return;
-    const srv = servicos.find(s => s.id === servicoAvulso);
+    if (!servicoAvulso.id) return;
+    const srv = servicos.find(s => s.id === servicoAvulso.id);
     if (!srv) return;
+
+    const preco = parseFloat(servicoAvulso.preco);
+    if (isNaN(preco) || preco < 0) {
+      setAlertMessage('Informe um preço válido para o serviço.');
+      return;
+    }
 
     const novoServico = {
       servico_id: srv.id,
       nome: srv.nome,
-      preco: Number(srv.preco)
+      preco
     };
 
     setFormData(prev => ({
       ...prev,
       servicos_vinculados: [...prev.servicos_vinculados, novoServico]
     }));
-    setServicoAvulso('');
+    setServicoAvulso({ id: '', preco: '' });
   }
 
   function removerServicoVinculado(index) {
@@ -268,19 +274,25 @@ export default function Appointments() {
       return;
     }
 
+    const preco = parseFloat(produtoAvulso.preco);
+    if (isNaN(preco) || preco < 0) {
+      setAlertMessage('Informe um preço válido para o produto.');
+      return;
+    }
+
     const novoVinculo = {
       produto_id: prod.id,
       nome: prod.nome,
       quantidade: produtoAvulso.quantidade,
-      preco: Number(prod.preco),
-      total: Number(prod.preco) * produtoAvulso.quantidade
+      preco,
+      total: preco * produtoAvulso.quantidade
     };
 
     setFormData(prev => ({
       ...prev,
       produtos_vinculados: [...prev.produtos_vinculados, novoVinculo]
     }));
-    setProdutoAvulso({ id: '', quantidade: 1 });
+    setProdutoAvulso({ id: '', quantidade: 1, preco: '' });
   }
 
   function removerProdutoVinculado(index) {
@@ -770,8 +782,11 @@ export default function Appointments() {
                 <label className="form-label">Adicionar Serviço</label>
                 <select
                   className="form-select"
-                  value={servicoAvulso}
-                  onChange={(e) => setServicoAvulso(e.target.value)}
+                  value={servicoAvulso.id}
+                  onChange={(e) => {
+                    const srv = servicos.find(s => s.id === e.target.value);
+                    setServicoAvulso({ id: e.target.value, preco: srv ? String(srv.preco) : '' });
+                  }}
                 >
                   <option value="">Selecione um serviço...</option>
                   {servicos.map(s => (
@@ -780,6 +795,19 @@ export default function Appointments() {
                     </option>
                   ))}
                 </select>
+              </div>
+              <div className="form-group" style={{ flex: '1' }}>
+                <label className="form-label">Preço</label>
+                <input
+                  className="form-input"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  placeholder="0,00"
+                  value={servicoAvulso.preco}
+                  onChange={(e) => setServicoAvulso({ ...servicoAvulso, preco: e.target.value })}
+                  disabled={!servicoAvulso.id}
+                />
               </div>
               <div className="form-group">
                 <button type="button" className="btn btn-secondary" onClick={adicionarServicoAoAgendamento}>Adicionar</button>
@@ -836,7 +864,10 @@ export default function Appointments() {
                 <select
                   className="form-select"
                   value={produtoAvulso.id}
-                  onChange={(e) => setProdutoAvulso({ ...produtoAvulso, id: e.target.value })}
+                  onChange={(e) => {
+                    const prod = produtos.find(p => p.id === e.target.value);
+                    setProdutoAvulso({ ...produtoAvulso, id: e.target.value, preco: prod ? String(prod.preco) : '' });
+                  }}
                 >
                   <option value="">Selecione para adicionar...</option>
                   {produtos.filter(p => p.estoque > 0).map(p => (
@@ -854,6 +885,19 @@ export default function Appointments() {
                   className="form-input"
                   value={produtoAvulso.quantidade}
                   onChange={(e) => setProdutoAvulso({ ...produtoAvulso, quantidade: parseInt(e.target.value) || 1 })}
+                />
+              </div>
+              <div className="form-group" style={{ flex: '1' }}>
+                <label className="form-label">Preço un.</label>
+                <input
+                  className="form-input"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  placeholder="0,00"
+                  value={produtoAvulso.preco}
+                  onChange={(e) => setProdutoAvulso({ ...produtoAvulso, preco: e.target.value })}
+                  disabled={!produtoAvulso.id}
                 />
               </div>
               <div className="form-group">
