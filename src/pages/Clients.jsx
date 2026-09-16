@@ -45,7 +45,10 @@ export default function Clients() {
 
   async function salvarCliente(e) {
     e.preventDefault();
-    if (!formCliente.nome) return;
+    if (!formCliente.nome.trim() || !formCliente.telefone.trim()) {
+      setAlertMessage('Nome e telefone são obrigatórios.');
+      return;
+    }
 
     try {
       if (editandoId) {
@@ -133,8 +136,8 @@ export default function Clients() {
             <input className="form-input" value={formCliente.nome} onChange={e => setFormCliente({...formCliente, nome: e.target.value})} required />
           </div>
           <div className="form-group">
-            <label className="form-label">Telefone</label>
-            <input className="form-input" value={formCliente.telefone} onChange={e => setFormCliente({...formCliente, telefone: e.target.value})} placeholder="(11) 99999-9999" />
+            <label className="form-label">Telefone *</label>
+            <input className="form-input" value={formCliente.telefone} onChange={e => setFormCliente({...formCliente, telefone: e.target.value})} placeholder="(11) 99999-9999" required />
           </div>
           <div className="form-group">
             <label className="form-label">Observações</label>
